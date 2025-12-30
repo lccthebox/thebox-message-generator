@@ -38,7 +38,6 @@
       font-size:14px;line-height:1.55
     }
     .badge{display:inline-block;font-size:12px;color:#111827;background:#eef2ff;border:1px solid #e0e7ff;padding:4px 8px;border-radius:999px}
-    .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media (max-width: 980px){ .grid{grid-template-columns:1fr} pre{min-height:320px} }
   </style>
 </head>
@@ -47,14 +46,13 @@
   <h1>더박스 메시지 생성기 <span class="badge">템플릿 + 체크 + 빈칸</span></h1>
 
   <div class="grid">
-    <!-- LEFT (파란 영역 역할) -->
     <div class="card">
       <h2>1) 종류 선택</h2>
       <div id="typeRadios" class="chips"></div>
 
       <h2>2) 포함할 섹션</h2>
       <div id="sectionChecks" class="chips"></div>
-      <div class="muted">종류를 고르면 기본 체크 상태가 자동으로 바뀝니다. 필요하면 직접 켜고 끄면 됩니다.</div>
+      <div class="muted">종류를 고르면 기본 체크 상태가 자동으로 바뀝니다. (종류에 따라 일부 섹션은 숨겨집니다)</div>
 
       <h2>3) 입력(빈칸)</h2>
       <div id="fields"></div>
@@ -66,12 +64,11 @@
       </div>
     </div>
 
-    <!-- RIGHT (노란 영역 역할) -->
     <div class="card">
       <h2>생성 문장 (미리보기)</h2>
       <pre id="output"></pre>
       <div class="muted" style="margin-top:10px">
-        규칙: 선택된 “섹션 블록”을 순서대로 붙이고, {변수}를 입력값으로 치환합니다. 입력이 비어있으면 해당 줄은 자동 제거됩니다.
+        규칙: 선택된 블록을 순서대로 붙이고, {변수}를 입력값으로 치환합니다. 입력이 비어있으면 해당 줄은 자동 제거됩니다.
       </div>
     </div>
   </div>
@@ -80,7 +77,7 @@
 <script>
 /**
  * =========================
- * 1) CONFIG (한번에 잡아둔 설계)
+ * CONFIG
  * =========================
  */
 const CONFIG = {
@@ -92,19 +89,52 @@ const CONFIG = {
     address: "대구광역시 중구 동성로 2 6층"
   },
 
-  // 드롭다운 옵션(현장 운영에 맞게 여기만 고치면 됨)
+  // 수강명 → 위치 자동 매핑
+  courseToLocation: {
+    "제임스 진짜영어": "7층 703호",
+    "크리스 미디어영어": "8층 803호",
+    "설린 도전영어": "7층 704호",
+    "유나 YouNow영어": "8층 806호",
+    "티나 트렌디 영어": "8층 805호",
+    "제인 제일영어": "7층 701호",
+    "라일리 Right 영어": "8층 801호",
+    "코트니 Go-to 영어": "8층 807호",
+    "다이애나 바로 영어": "7층 704호",
+    "짜이뤼 중국어": "7층 705호",
+    "원어민 회화스터디": "6층 (상담/로비)"
+  },
+
   options: {
     location: [
       "6층 (상담/로비)",
+      "7층 701호",
+      "7층 703호",
       "7층 704호",
+      "7층 705호",
       "8층 801호",
-      "8층 803호"
+      "8층 803호",
+      "8층 805호",
+      "8층 806호",
+      "8층 807호"
+    ],
+    courseNames: [
+      "제임스 진짜영어",
+      "크리스 미디어영어",
+      "설린 도전영어",
+      "유나 YouNow영어",
+      "티나 트렌디 영어",
+      "제인 제일영어",
+      "라일리 Right 영어",
+      "코트니 Go-to 영어",
+      "다이애나 바로 영어",
+      "짜이뤼 중국어",
+      "원어민 회화스터디",
+      "기타(직접입력)"
     ],
     ampm: ["오전", "오후"],
     payMethods: ["카드(현장결제)", "카드(모바일결제)", "계좌이체", "온누리", "대구로페이"],
   },
 
-  // 섹션 정의(체크박스에 표시될 항목)
   sections: [
     { id: "enroll",   label: "✅ 수강 정보" },
     { id: "payment",  label: "✅ 결제 정보" },
@@ -115,47 +145,62 @@ const CONFIG = {
     { id: "cash",     label: "✅ 현금영수증 안내" },
   ],
 
-  // 종류(A) 템플릿(종류별로 "기본 포함 섹션" + "출력 블록 순서" + "문구" 정의)
+  // 종류
   types: [
     {
       id: "audit",
       label: "청강",
       defaultSections: ["enroll"],
+      allowedSections: ["enroll"],
       order: ["header", "auditIntro", "enrollBlock", "closing"]
     },
     {
       id: "consultTalk",
       label: "상담톡",
       defaultSections: ["consult"],
+      allowedSections: ["consult"],
       order: ["consultHeader", "consultBlock"]
     },
+
+    // 새로 추가: 결제후 시작카톡 (할인/기타 안 뜨게)
+    {
+      id: "paidStartKakao",
+      label: "결제후 시작카톡",
+      defaultSections: ["enroll"],
+      allowedSections: ["enroll"],
+      order: ["header", "paidStartIntro", "enrollBlock", "closing"]
+    },
+
     {
       id: "nativeStudyStart",
       label: "원어민회화스터디 시작 카톡",
       defaultSections: ["enroll", "etc"],
+      allowedSections: ["enroll", "payment", "etc"], // 필요하면 payment도 켤 수 있게
       order: ["header", "paidStartIntro", "enrollBlock", "etcBlock", "closing"]
     },
     {
       id: "repay",
       label: "재수강",
       defaultSections: ["enroll", "payment", "discount", "etc"],
+      allowedSections: ["enroll", "payment", "discount", "etc"],
       order: ["header", "prePayIntro", "enrollBlock", "paymentBlock", "discountBlock", "etcBlock", "closingSoft"]
     },
     {
       id: "cashReceipt",
       label: "현금영수증",
       defaultSections: ["cash"],
+      allowedSections: ["cash"],
       order: ["cashHeader", "cashBlock"]
     },
     {
       id: "certificate",
       label: "수강증 발급",
       defaultSections: ["cert"],
+      allowedSections: ["cert"],
       order: ["certHeader", "certBlock"]
     },
   ],
 
-  // 블록(문장 조각) 정의: {var} 치환 + 빈줄 제거 규칙을 고려해 "줄 단위" 구성
   blocks: {
     header:
 `안녕하세요 더박스입니다😊
@@ -199,24 +244,26 @@ const CONFIG = {
 ▪ 이체시에는 상기 계좌로 이체 후에 현금영수증 발급을 위한 번호 혹은 사업자등록번호도 함께 남겨주시면 됩니다. ({cashNumber})
 `,
 
+    // ○ 제거 완료
     discountBlock:
 `✅ 할인 이벤트 정보
-○🔹 영수증 리뷰 10,000원 추가 할인
+🔹 영수증 리뷰 10,000원 추가 할인
 1. 네이버 플레이스에 리뷰 작성 (사진 아무거나 첨부 OK)
 2. 작성일이 보이도록 캡처 후 카톡 전송
 ※ 리뷰 작성법 필요하시면 말씀해주세요!
 ※ 이번 달 영수증은 다음 달 할인 적용 가능해요.
 `,
 
+    // ○ 제거 완료
     etcBlock:
 `✅ 기타
-○✅ 아래 카페에서 해당 내용 확인 가능하십니다.
+아래 카페에서 해당 내용 확인 가능하십니다.
 - 시작하시는 날의 토픽 (이전 토픽들도 꺼내서 공부 하실 수 있어요!)
 - 홀딩 신청
 - 더박스 후기
 네이버카페 주소: {cafe}
 
-○ * 다음달 각 선생님 스케쥴표는 각 강의실 앞/ 더박스 인스타그램 혹은 아래 홈페이지 링크에서 확인 가능하십니다.
+* 다음달 각 선생님 스케쥴표는 각 강의실 앞/ 더박스 인스타그램 혹은 아래 홈페이지 링크에서 확인 가능하십니다.
 {schedule}
 `,
 
@@ -267,7 +314,6 @@ const CONFIG = {
 `,
   },
 
-  // 필드(빈칸 입력) 정의: 섹션/종류별 공통으로 쓰되, 필요할 때만 노출
   fields: [
     // 수강정보
     { id:"startMonth", label:"시작 월", type:"number", min:1, max:12, placeholder:"예: 1", group:"enroll" },
@@ -275,11 +321,16 @@ const CONFIG = {
     { id:"ampm", label:"오전/오후", type:"select", optionsKey:"ampm", group:"enroll" },
     { id:"hour", label:"시", type:"number", min:1, max:12, placeholder:"예: 7", group:"enroll" },
     { id:"minute", label:"분(선택)", type:"text", placeholder:"예: 30 (비우면 시만 표시)", group:"enroll" },
-    { id:"courseName", label:"수강명", type:"text", placeholder:"예: 크리스 미디어영어", group:"enroll" },
+
+    // 수강명: 드롭다운 + 기타(직접입력)
+    { id:"courseName", label:"수강명", type:"select", optionsKey:"courseNames", group:"enroll" },
+    { id:"courseNameCustom", label:"수강명(직접입력)", type:"text", placeholder:"예: (직접 입력)", group:"enroll", showIf:{ field:"courseName", equals:"기타(직접입력)" } },
+
+    // 위치: 수강명 매핑이면 자동/잠금
     { id:"location", label:"위치", type:"select", optionsKey:"location", group:"enroll" },
 
     // 결제정보
-    { id:"customerType", label:"구분(NEW/복귀)", type:"select", options:["NEW","복귀","재수강"], group:"payment" },
+    { id:"customerType", label:"구분", type:"select", options:["NEW","복귀","재수강"], group:"payment" },
     { id:"amount", label:"금액", type:"text", placeholder:"예: 31만원 / 2과목 29만원", group:"payment" },
     { id:"payMethods", label:"결제방식(복수)", type:"multicheck", optionsKey:"payMethods", group:"payment" },
     { id:"payLinkPhone", label:"결제링크 받을 번호(선택)", type:"text", placeholder:"예: 010-1234-5678", group:"payment" },
@@ -307,20 +358,19 @@ const CONFIG = {
 
 /**
  * =========================
- * 2) STATE
+ * STATE
  * =========================
  */
 const state = {
   typeId: CONFIG.types[0].id,
   sectionsOn: new Set(CONFIG.types[0].defaultSections),
-  values: {}, // fieldId -> value
+  values: {},
 };
-
 function currentType(){ return CONFIG.types.find(t => t.id === state.typeId); }
 
 /**
  * =========================
- * 3) UI RENDER
+ * UI
  * =========================
  */
 const $typeRadios = document.getElementById("typeRadios");
@@ -337,7 +387,6 @@ function renderTypes(){
                     <span>${t.label}</span>`;
     el.querySelector("input").addEventListener("change", () => {
       state.typeId = t.id;
-      // 종류 바꾸면 기본 섹션으로 리셋(업무 흐름상 이게 더 안전)
       state.sectionsOn = new Set(t.defaultSections);
       renderSections();
       renderFields();
@@ -349,7 +398,12 @@ function renderTypes(){
 
 function renderSections(){
   $sectionChecks.innerHTML = "";
+  const t = currentType();
+  const allowed = new Set(t.allowedSections || CONFIG.sections.map(s => s.id));
+
   CONFIG.sections.forEach(s => {
+    if(!allowed.has(s.id)) return;
+
     const el = document.createElement("label");
     el.className = "chip";
     const checked = state.sectionsOn.has(s.id) ? "checked" : "";
@@ -366,8 +420,12 @@ function renderSections(){
 }
 
 function fieldVisible(field){
-  // group이 켜져있을 때만 노출. 단, group이 없는 필드는 항상 노출(현재는 전부 group 있음)
-  return !field.group || state.sectionsOn.has(field.group);
+  if(field.group && !state.sectionsOn.has(field.group)) return false;
+  if(field.showIf){
+    const cur = (state.values[field.showIf.field] ?? "");
+    if(cur !== field.showIf.equals) return false;
+  }
+  return true;
 }
 
 function renderFields(){
@@ -400,6 +458,21 @@ function renderFields(){
         ctrl.appendChild(opt);
       });
       ctrl.value = state.values[f.id] ?? (opts[0] ?? "");
+
+      // 위치는 수강명 매핑이면 잠금(상담톡은 6층 고정)
+      if(f.id === "location"){
+        const coursePicked = (state.values.courseName || "").trim();
+        const mappedLoc = CONFIG.courseToLocation[coursePicked];
+        const lock = (state.typeId === "consultTalk") || (!!mappedLoc && coursePicked !== "기타(직접입력)");
+        if(lock){
+          ctrl.value = (state.typeId === "consultTalk") ? "6층 (상담/로비)" : mappedLoc;
+          state.values.location = ctrl.value;
+          ctrl.disabled = true;
+        } else {
+          ctrl.disabled = false;
+        }
+      }
+
     } else if(f.type === "multicheck"){
       ctrl = document.createElement("div");
       ctrl.className = "inline";
@@ -429,48 +502,81 @@ function renderFields(){
     if(f.type !== "multicheck"){
       ctrl.addEventListener("input", () => {
         state.values[f.id] = ctrl.value;
+
+        // 수강명 바뀌면 위치 자동 갱신(매핑이면 강제)
+        if(f.id === "courseName"){
+          const picked = (state.values.courseName || "").trim();
+          const mapped = CONFIG.courseToLocation[picked];
+          if(mapped && picked !== "기타(직접입력)"){
+            state.values.location = mapped;
+          }
+          renderFields();
+        }
+
         updateOutput();
       });
       ctrl.addEventListener("change", () => {
         state.values[f.id] = ctrl.value;
+
+        if(f.id === "courseName"){
+          const picked = (state.values.courseName || "").trim();
+          const mapped = CONFIG.courseToLocation[picked];
+          if(mapped && picked !== "기타(직접입력)"){
+            state.values.location = mapped;
+          }
+          renderFields();
+        }
+
         updateOutput();
       });
-    } else {
-      // multicheck는 위에서 처리
     }
 
     row.appendChild(lab);
     ctrlWrap.appendChild(ctrl);
     row.appendChild(ctrlWrap);
-
     $fields.appendChild(row);
   });
 }
 
 /**
  * =========================
- * 4) GENERATION LOGIC
+ * GENERATION
  * =========================
  */
 function buildVars(){
   const v = {...state.values};
 
-  // 상수(메타)
+  // 수강명 확정(기타면 직접입력)
+  const coursePicked = (v.courseName || "").trim();
+  if(coursePicked === "기타(직접입력)"){
+    v.courseName = (v.courseNameCustom || "").trim();
+  }
+
+  // 수강명→위치 자동
+  const mappedLoc = CONFIG.courseToLocation[coursePicked];
+  const isCourseMapped = !!mappedLoc;
+
+  if(state.typeId === "consultTalk"){
+    v.location = "6층 (상담/로비)";
+  } else {
+    if(isCourseMapped && coursePicked !== "기타(직접입력)") v.location = mappedLoc;
+  }
+
+  // 고정값
   v.bank = CONFIG.meta.bank;
   v.cafe = CONFIG.meta.cafe;
   v.schedule = CONFIG.meta.schedule;
   v.address = CONFIG.meta.address;
 
-  // minuteLine: 분이 있으면 " 30분" 형태로 붙이기
+  // 분 표현
   const minute = (v.minute || "").trim();
   v.minuteLine = minute ? ` ${minute}분` : "";
 
-  // amountLine, payMethodLine: 비었으면 줄 제거될 수 있도록 공백 처리
+  // 결제 라인
   v.amountLine = (v.amount || "").trim();
   const paySet = (v.payMethods || "").split("|").filter(Boolean);
   v.payMethodLine = paySet.length ? paySet.join(", ") : "";
 
-  // 결제 관련 선택값이 없을 때 괄호 줄이 너무 어색하면 “( )” 자체가 제거되게 빈값 유지
   v.payLinkPhone = (v.payLinkPhone || "").trim();
   v.cashNumber = (v.cashNumber || "").trim();
 
@@ -478,30 +584,23 @@ function buildVars(){
 }
 
 function applyTemplate(str, vars){
-  // {var} 치환
   let out = str.replace(/\{([a-zA-Z0-9_]+)\}/g, (_, key) => (vars[key] ?? "").toString());
 
-  // "괄호만 남는" 케이스 정리: "( )" "(  )" "(내용없음)" 등 -> 통째로 제거
-  out = out.replace(/\(\s*\)/g, "");
+  // 빈 괄호 제거
   out = out.replace(/\(\s*\)/g, "");
 
-  // 빈 값 때문에 의미 없는 라인 제거:
-  // - "- xxx : " 처럼 콜론 뒤가 비면 라인 삭제
-  // - "- xxx : " + 공백만 있어도 삭제
+  // 값 없는 라인 제거
   out = out.split("\n").filter(line => {
     const trimmed = line.trim();
-    if(trimmed === "") return true; // 빈줄은 유지(전체 다 붙인 뒤에 정리)
-    // 콜론 뒤가 비었는지
+    if(trimmed === "") return true;
     if(/:\s*$/.test(trimmed)) return false;
-    // "- 금액 : " 같은 라인
     if(/-\s*[^:]+:\s*$/.test(trimmed)) return false;
     return true;
   }).join("\n");
 
-  // 연속 빈줄 3개 이상은 2개로 제한
+  // 연속 빈줄 정리
   out = out.replace(/\n{3,}/g, "\n\n");
 
-  // 앞뒤 공백 정리
   return out.trim() + "\n";
 }
 
@@ -509,14 +608,6 @@ function activeBlocksForType(){
   const t = currentType();
   const on = state.sectionsOn;
 
-  // 타입의 order를 기준으로, 섹션 체크와 맞는 블록만 포함
-  // enrollBlock -> enroll 섹션이 켜져있을 때만
-  // paymentBlock -> payment
-  // discountBlock -> discount
-  // etcBlock -> etc
-  // consultBlock -> consult
-  // certBlock -> cert
-  // cashBlock -> cash
   const map = {
     enrollBlock: "enroll",
     paymentBlock: "payment",
@@ -529,7 +620,7 @@ function activeBlocksForType(){
 
   return t.order.filter(blockId => {
     const needed = map[blockId];
-    if(!needed) return true; // 헤더/클로징 같은 공통 블록
+    if(!needed) return true;
     return on.has(needed);
   });
 }
@@ -537,16 +628,14 @@ function activeBlocksForType(){
 function updateOutput(){
   const vars = buildVars();
   const blocks = activeBlocksForType();
-
   const parts = blocks.map(id => applyTemplate(CONFIG.blocks[id] || "", vars));
-  // 마지막에 전체 다 합치고, 연속 빈줄 정리
   let text = parts.join("\n").replace(/\n{3,}/g, "\n\n").trim() + "\n";
   $output.textContent = text;
 }
 
 /**
  * =========================
- * 5) ACTIONS
+ * ACTIONS
  * =========================
  */
 document.getElementById("copyBtn").addEventListener("click", async () => {
@@ -555,7 +644,6 @@ document.getElementById("copyBtn").addEventListener("click", async () => {
     await navigator.clipboard.writeText(text);
     alert("복사 완료");
   }catch(e){
-    // fallback
     const ta = document.createElement("textarea");
     ta.value = text;
     document.body.appendChild(ta);
@@ -578,14 +666,16 @@ document.getElementById("resetBtn").addEventListener("click", () => {
 });
 
 document.getElementById("fillDemoBtn").addEventListener("click", () => {
-  // 현재 타입에 맞춰 대충 자연스러운 데모값
   const t = currentType();
+
   state.values.startMonth = "1";
   state.values.startDay = "10";
   state.values.ampm = "오후";
   state.values.hour = "7";
   state.values.minute = "30";
+
   state.values.courseName = "크리스 미디어영어";
+  state.values.courseNameCustom = "";
   state.values.location = "8층 803호";
 
   state.values.customerType = (t.id === "repay") ? "재수강" : "NEW";
@@ -614,9 +704,7 @@ document.getElementById("fillDemoBtn").addEventListener("click", () => {
 });
 
 /**
- * =========================
- * 6) INIT
- * =========================
+ * INIT
  */
 renderTypes();
 renderSections();
