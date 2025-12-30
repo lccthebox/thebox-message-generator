@@ -99,7 +99,7 @@ const CONFIG = {
     "코트니 Go-to 영어": "8층 807호",
     "다이애나 바로 영어": "7층 704호",
     "짜이뤼 중국어": "7층 705호",
-    "원어민 회화스터디": "6층 (상담/로비)"
+    "원어민 회화스터디": "6층"
   },
 
   // 선생님별 시간 규칙
@@ -113,7 +113,7 @@ const CONFIG = {
 
   options: {
     location: [
-      "6층 (상담/로비)",
+      "6층",
       "7층 701호",
       "7층 703호",
       "7층 704호",
@@ -516,7 +516,7 @@ function renderFields(){
         const mappedLoc = CONFIG.courseToLocation[coursePicked];
         const lock = (state.typeId === "consultTalk") || (!!mappedLoc && coursePicked !== "기타(직접입력)");
         if(lock){
-          ctrl.value = (state.typeId === "consultTalk") ? "6층 (상담/로비)" : mappedLoc;
+          ctrl.value = (state.typeId === "consultTalk") ? "6층" : mappedLoc;
           state.values.location = ctrl.value;
           ctrl.disabled = true;
         } else {
@@ -603,7 +603,7 @@ function buildVars(){
   const isCourseMapped = !!mappedLoc;
 
   if(state.typeId === "consultTalk"){
-    v.location = "6층 (상담/로비)";
+    v.location = "6층";
   } else {
     if(isCourseMapped && coursePicked !== "기타(직접입력)") v.location = mappedLoc;
   }
