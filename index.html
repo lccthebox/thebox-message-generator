@@ -23,8 +23,6 @@
     .chips{display:flex;flex-wrap:wrap;gap:10px}
     .chip{display:flex;align-items:center;gap:8px;border:1px solid var(--bd);border-radius:999px;padding:8px 10px;background:#fff}
     .chip input{transform:translateY(1px)}
-    .inline{display:flex;gap:10px;flex-wrap:wrap}
-    .inline .chip{padding:6px 10px}
     .muted{font-size:12px;color:#6b7280;line-height:1.4}
     .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
     button{
@@ -109,6 +107,7 @@ const CONFIG = {
     james: ["오전 11시 45분", "오후 8시 45분"],
     chris: ["오전 9시 30분", "오후 6시 30분", "오후 8시 30분"],
     fixed10_1130_1330: ["오전 10시", "오전 11시 30분", "오후 1시 30분"],
+    nativeStudy: ["오전 11시", "오후 8시"],
     others: ["오전 10시 30분", "오후 12시", "오후 6시 50분", "오후 8시 30분"]
   },
 
@@ -151,7 +150,7 @@ const CONFIG = {
     { id: "cash",     label: "✅ 현금영수증 안내" },
   ],
 
-  // 종류
+  // 종류 (결제후 시작카톡 제거, 라벨 변경 반영)
   types: [
     {
       id: "audit",
@@ -167,31 +166,20 @@ const CONFIG = {
       allowedSections: ["consult"],
       order: ["consultHeader", "consultBlock"]
     },
-
-    {
-      id: "paidStartKakao",
-      label: "결제후 시작카톡",
-      defaultSections: ["enroll"],
-      allowedSections: ["enroll"],
-      order: ["header", "paidStartIntro", "enrollBlock", "closing"]
-    },
-
     {
       id: "nativeStudyStart",
-      label: "원어민회화스터디 시작 카톡",
-      defaultSections: ["enroll", "etc"],
-      allowedSections: ["enroll", "payment", "etc"],
-      order: ["header", "paidStartIntro", "enrollBlock", "paymentBlock", "etcBlock", "closing"]
+      label: "원어민회화 스터디",
+      defaultSections: ["enroll", "discount", "etc"],
+      allowedSections: ["enroll", "payment", "discount", "etc"],
+      order: ["header", "prePayIntro", "enrollBlock", "discountBlock", "etcBlock", "closing"]
     },
-
     {
       id: "repay",
-      label: "아카데미 시작카톡",
+      label: "아카데미",
       defaultSections: ["enroll", "payment", "discount", "etc"],
       allowedSections: ["enroll", "payment", "discount", "etc"],
       order: ["header", "prePayIntro", "enrollBlock", "paymentBlock", "discountBlock", "etcBlock", "closingSoft"]
     },
-
     {
       id: "cashReceipt",
       label: "현금영수증",
@@ -217,10 +205,7 @@ const CONFIG = {
 `오늘 상담 받으신 청강 수업 안내 드리겠습니다!
 `,
 
-    paidStartIntro:
-`오늘 등록하신 수업 안내 드리겠습니다!
-`,
-
+    // 원어민회화스터디도 이 문구 사용(요청 8번)
     prePayIntro:
 `시작하시는 수업 안내 드리겠습니다!
 `,
@@ -233,7 +218,6 @@ const CONFIG = {
 `감사합니다☺☺
 `,
 
-    // 시간 텍스트 출력으로 변경
     enrollBlock:
 `🔸수강 및 정보🔸
 - 시작 일자 및 시간 : {startMonth}월 {startDay}일 {timeText}
@@ -241,7 +225,6 @@ const CONFIG = {
 - 위치 : {location}
 `,
 
-    // 결제방식은 고정 문구(체크/번호 입력 없음)
     paymentBlock:
 `✅ 결제 정보
 - 금액 : {amountLine}
@@ -249,18 +232,18 @@ const CONFIG = {
 - 이체시 결제 계좌 : {bank}
 `,
 
+    // (요청 7) ✅ 할인 이벤트 정보 문구 삭제
     discountBlock:
-`✅ 할인 이벤트 정보
-🔹 영수증 리뷰 10,000원 추가 할인
+`🔹 영수증 리뷰 10,000원 추가 할인
 1. 네이버 플레이스에 리뷰 작성 (사진 아무거나 첨부 OK)
 2. 작성일이 보이도록 캡처 후 카톡 전송
 ※ 리뷰 작성법 필요하시면 말씀해주세요!
 ※ 이번 달 영수증은 다음 달 할인 적용 가능해요.
 `,
 
+    // (요청 7) ✅ 기타 문구 삭제
     etcBlock:
-`✅ 기타
-아래 카페에서 해당 내용 확인 가능하십니다.
+`아래 카페에서 해당 내용 확인 가능하십니다.
 - 시작하시는 날의 토픽 (이전 토픽들도 꺼내서 공부 하실 수 있어요!)
 - 홀딩 신청
 - 더박스 후기
@@ -361,25 +344,6 @@ const CONFIG = {
 
 /**
  * =========================
- * TIME HELPERS
- * =========================
- */
-function teacherKeyFromCourse(courseName){
-  const c = (courseName || "").trim();
-  if(c.startsWith("제임스")) return "james";
-  if(c.startsWith("크리스")) return "chris";
-  if(c.startsWith("코트니") || c.startsWith("다이애나") || c.startsWith("라일리")) return "fixed10_1130_1330";
-  return "others";
-}
-function getTimeOptions(){
-  const picked = (state.values.courseName || "").trim();
-  const key = teacherKeyFromCourse(picked);
-  const base = CONFIG.timeRules[key] || CONFIG.timeRules.others;
-  return [...base, "기타(직접입력)"];
-}
-
-/**
- * =========================
  * STATE
  * =========================
  */
@@ -389,6 +353,30 @@ const state = {
   values: {},
 };
 function currentType(){ return CONFIG.types.find(t => t.id === state.typeId); }
+
+/**
+ * =========================
+ * TIME HELPERS
+ * =========================
+ */
+function teacherKeyFromCourse(courseName){
+  const c = (courseName || "").trim();
+
+  // 원어민 회화스터디 전용 시간(요청 4)
+  if(c === "원어민 회화스터디") return "nativeStudy";
+
+  if(c.startsWith("제임스")) return "james";
+  if(c.startsWith("크리스")) return "chris";
+  if(c.startsWith("코트니") || c.startsWith("다이애나") || c.startsWith("라일리")) return "fixed10_1130_1330";
+  return "others";
+}
+
+function getTimeOptions(){
+  const picked = (state.values.courseName || "").trim();
+  const key = teacherKeyFromCourse(picked);
+  const base = CONFIG.timeRules[key] || CONFIG.timeRules.others;
+  return [...base, "기타(직접입력)"];
+}
 
 /**
  * =========================
@@ -410,6 +398,23 @@ function renderTypes(){
     el.querySelector("input").addEventListener("change", () => {
       state.typeId = t.id;
       state.sectionsOn = new Set(t.defaultSections);
+
+      // 타입 변경 시: 수강명 옵션 규칙에 맞게 즉시 초기화(요청 5)
+      if(state.typeId === "nativeStudyStart"){
+        state.values.courseName = "원어민 회화스터디";
+        state.values.courseNameCustom = "";
+      } else if(state.typeId === "repay"){
+        // 아카데미에서 원어민 회화스터디 제거
+        if(state.values.courseName === "원어민 회화스터디"){
+          state.values.courseName = CONFIG.options.courseNames.find(x => x !== "원어민 회화스터디") || "";
+        }
+      }
+
+      // 타입 변경 시: 시간 옵션도 재설정
+      const timeOpts = getTimeOptions();
+      state.values.timeSlot = timeOpts[0] || "";
+      state.values.timeCustom = "";
+
       renderSections();
       renderFields();
       updateOutput();
@@ -475,9 +480,25 @@ function renderFields(){
       ctrl = document.createElement("select");
 
       let opts;
-      if(f.optionsFn === "timeOptions"){
+
+      // 수강명 옵션 분기(요청 5)
+      if(f.id === "courseName"){
+        const all = CONFIG.options.courseNames.slice();
+
+        if(state.typeId === "nativeStudyStart"){
+          opts = ["원어민 회화스터디"];
+        } else if(state.typeId === "repay"){
+          opts = all.filter(x => x !== "원어민 회화스터디");
+        } else {
+          opts = all;
+        }
+      }
+      // 시간 옵션
+      else if(f.optionsFn === "timeOptions"){
         opts = getTimeOptions();
-      } else {
+      }
+      // 일반 옵션
+      else {
         opts = f.optionsKey ? CONFIG.options[f.optionsKey] : f.options;
       }
 
@@ -489,7 +510,7 @@ function renderFields(){
 
       ctrl.value = state.values[f.id] ?? (opts[0] ?? "");
 
-      // 위치는 수강명 매핑이면 잠금(상담톡은 6층 고정)
+      // location 잠금(상담톡 6층 고정 / 수강명 매핑이면 자동)
       if(f.id === "location"){
         const coursePicked = (state.values.courseName || "").trim();
         const mappedLoc = CONFIG.courseToLocation[coursePicked];
@@ -515,7 +536,7 @@ function renderFields(){
     ctrl.addEventListener("input", () => {
       state.values[f.id] = ctrl.value;
 
-      // 수강명 바뀌면: 위치 + 시간 자동 갱신
+      // 수강명 변경 시: 위치 + 시간 자동 갱신
       if(f.id === "courseName"){
         const picked = (state.values.courseName || "").trim();
 
@@ -525,7 +546,7 @@ function renderFields(){
           state.values.location = mapped;
         }
 
-        // 시간 옵션 자동(첫 옵션으로)
+        // 시간 자동(첫 옵션으로)
         const timeOpts = getTimeOptions();
         state.values.timeSlot = timeOpts[0] || "";
         state.values.timeCustom = "";
@@ -541,7 +562,6 @@ function renderFields(){
 
       if(f.id === "courseName"){
         const picked = (state.values.courseName || "").trim();
-
         const mapped = CONFIG.courseToLocation[picked];
         if(mapped && picked !== "기타(직접입력)"){
           state.values.location = mapped;
@@ -611,10 +631,8 @@ function buildVars(){
 function applyTemplate(str, vars){
   let out = str.replace(/\{([a-zA-Z0-9_]+)\}/g, (_, key) => (vars[key] ?? "").toString());
 
-  // 빈 괄호 제거
   out = out.replace(/\(\s*\)/g, "");
 
-  // 값 없는 라인 제거
   out = out.split("\n").filter(line => {
     const trimmed = line.trim();
     if(trimmed === "") return true;
@@ -623,7 +641,6 @@ function applyTemplate(str, vars){
     return true;
   }).join("\n");
 
-  // 연속 빈줄 정리
   out = out.replace(/\n{3,}/g, "\n\n");
 
   return out.trim() + "\n";
@@ -698,7 +715,6 @@ document.getElementById("fillDemoBtn").addEventListener("click", () => {
   state.values.courseNameCustom = "";
   state.values.location = "8층 803호";
 
-  // 시간은 수강명에 따라 자동 옵션 생성 후 첫 값
   const timeOpts = getTimeOptions();
   state.values.timeSlot = timeOpts[0] || "오후 6시 30분";
   state.values.timeCustom = "";
