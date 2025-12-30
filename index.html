@@ -99,7 +99,7 @@ const CONFIG = {
     "코트니 Go-to 영어": "8층 807호",
     "다이애나 바로 영어": "7층 704호",
     "짜이뤼 중국어": "7층 705호",
-    "원어민 회화스터디": "6층"
+    "원어민 회화스터디": "6층 (상담/로비)"
   },
 
   // 선생님별 시간 규칙
@@ -113,7 +113,7 @@ const CONFIG = {
 
   options: {
     location: [
-      "6층",
+      "6층 (상담/로비)",
       "7층 701호",
       "7층 703호",
       "7층 704호",
@@ -150,7 +150,7 @@ const CONFIG = {
     { id: "cash",     label: "✅ 현금영수증 안내" },
   ],
 
-  // 종류 (결제후 시작카톡 제거, 라벨 변경 반영)
+  // 종류
   types: [
     {
       id: "audit",
@@ -171,7 +171,7 @@ const CONFIG = {
       label: "원어민회화 스터디",
       defaultSections: ["enroll", "discount", "etc"],
       allowedSections: ["enroll", "payment", "discount", "etc"],
-      order: ["header", "prePayIntro", "enrollBlock", "discountBlock", "etcBlock", "closing"]
+      order: ["header", "prePayIntro", "enrollBlock", "paymentBlock", "discountBlock", "etcBlock", "closing"]
     },
     {
       id: "repay",
@@ -180,6 +180,16 @@ const CONFIG = {
       allowedSections: ["enroll", "payment", "discount", "etc"],
       order: ["header", "prePayIntro", "enrollBlock", "paymentBlock", "discountBlock", "etcBlock", "closingSoft"]
     },
+
+    // ✅ 추가: 원어민 문의(고정 영어 메시지)
+    {
+      id: "nativeFriends",
+      label: "원어민 문의",
+      defaultSections: [],
+      allowedSections: [],
+      order: ["nativeFriendsBlock"]
+    },
+
     {
       id: "cashReceipt",
       label: "현금영수증",
@@ -205,7 +215,6 @@ const CONFIG = {
 `오늘 상담 받으신 청강 수업 안내 드리겠습니다!
 `,
 
-    // 원어민회화스터디도 이 문구 사용(요청 8번)
     prePayIntro:
 `시작하시는 수업 안내 드리겠습니다!
 `,
@@ -218,21 +227,27 @@ const CONFIG = {
 `감사합니다☺☺
 `,
 
+    // ✅ 금액 줄을 수강정보에도 항상 포함(입력 안 하면 자동 삭제됨)
     enrollBlock:
 `🔸수강 및 정보🔸
 - 시작 일자 및 시간 : {startMonth}월 {startDay}일 {timeText}
 - 수강명 : {courseName}
 - 위치 : {location}
-`,
-
-    paymentBlock:
-`✅ 결제 정보
 - 금액 : {amountLine}
-- 결제방식 : 카드(현장결제/모바일결제), 계좌이체, 온누리, 대구로페이 결제 가능
-- 이체시 결제 계좌 : {bank}
 `,
 
-    // (요청 7) ✅ 할인 이벤트 정보 문구 삭제
+    // ✅ 결제 정보: 요청하신 문구로 변경
+    paymentBlock:
+`🔸결제 정보🔸
+- 금액 : {amountLine}
+- 결제방식 : 카드 (현장결제 / 모바일결제), 계좌이체, 온누리 및 대구로페이결제 가능
+- 이체시 결제 계좌 : {bank}
+
+▪  온라인 링크로 카드 결제시 결제링크 받으실 번호 부탁 드립니다.
+▪  이체시에는 상기 계좌로 이체 후에 현금영수증 발급을 위한 번호 혹은 사업자등록번호도 함께 남겨주시면 됩니다.
+`,
+
+    // ✅ (표시 제거) "✅ 할인 이벤트 정보" 라인 없음
     discountBlock:
 `🔹 영수증 리뷰 10,000원 추가 할인
 1. 네이버 플레이스에 리뷰 작성 (사진 아무거나 첨부 OK)
@@ -241,7 +256,7 @@ const CONFIG = {
 ※ 이번 달 영수증은 다음 달 할인 적용 가능해요.
 `,
 
-    // (요청 7) ✅ 기타 문구 삭제
+    // ✅ (표시 제거) "✅ 기타" 라인 없음
     etcBlock:
 `아래 카페에서 해당 내용 확인 가능하십니다.
 - 시작하시는 날의 토픽 (이전 토픽들도 꺼내서 공부 하실 수 있어요!)
@@ -301,6 +316,19 @@ const CONFIG = {
 
 확인 후 처리 도와드리겠습니다. 감사합니다 :)
 `,
+
+    // ✅ 새 타입 고정 메시지
+    nativeFriendsBlock:
+`Hello, thank you for reaching out to us!
+
+We’re a language exchange community.
+We don’t just do language exchange,  we also have parties and various activities you can join 🙂
+
+To check your preferred schedule and level, could you please fill out the short form in the link below?
+We have a manager who specializes in Korean classes, and that manager will contact you directly after reviewing your info.
+
+https://forms.gle/rbwZSvrjUa2bi8M4A
+`,
   },
 
   fields: [
@@ -319,8 +347,8 @@ const CONFIG = {
     // 위치: 수강명 매핑이면 자동/잠금
     { id:"location", label:"위치", type:"select", optionsKey:"location", group:"enroll" },
 
-    // 결제정보
-    { id:"amount", label:"금액", type:"text", placeholder:"예: 31만원 / 2과목 29만원", group:"payment" },
+    // 금액 (수강정보에도, 결제정보에도 사용)
+    { id:"amount", label:"금액", type:"text", placeholder:"예: 31만원 / 2과목 29만원", group:"enroll" },
 
     // 상담
     { id:"consultDate", label:"예약일자", type:"text", placeholder:"예: 1월 10일(금)", group:"consult" },
@@ -362,9 +390,7 @@ function currentType(){ return CONFIG.types.find(t => t.id === state.typeId); }
 function teacherKeyFromCourse(courseName){
   const c = (courseName || "").trim();
 
-  // 원어민 회화스터디 전용 시간(요청 4)
   if(c === "원어민 회화스터디") return "nativeStudy";
-
   if(c.startsWith("제임스")) return "james";
   if(c.startsWith("크리스")) return "chris";
   if(c.startsWith("코트니") || c.startsWith("다이애나") || c.startsWith("라일리")) return "fixed10_1130_1330";
@@ -399,18 +425,17 @@ function renderTypes(){
       state.typeId = t.id;
       state.sectionsOn = new Set(t.defaultSections);
 
-      // 타입 변경 시: 수강명 옵션 규칙에 맞게 즉시 초기화(요청 5)
+      // 타입 변경 시: 타입별 수강명/시간 기본값 세팅
       if(state.typeId === "nativeStudyStart"){
         state.values.courseName = "원어민 회화스터디";
         state.values.courseNameCustom = "";
       } else if(state.typeId === "repay"){
-        // 아카데미에서 원어민 회화스터디 제거
         if(state.values.courseName === "원어민 회화스터디"){
           state.values.courseName = CONFIG.options.courseNames.find(x => x !== "원어민 회화스터디") || "";
         }
       }
 
-      // 타입 변경 시: 시간 옵션도 재설정
+      // 시간 초기화
       const timeOpts = getTimeOptions();
       state.values.timeSlot = timeOpts[0] || "";
       state.values.timeCustom = "";
@@ -458,6 +483,7 @@ function fieldVisible(field){
 function renderFields(){
   $fields.innerHTML = "";
   const visibleFields = CONFIG.fields.filter(fieldVisible);
+
   if(visibleFields.length === 0){
     const p = document.createElement("div");
     p.className = "muted";
@@ -481,7 +507,7 @@ function renderFields(){
 
       let opts;
 
-      // 수강명 옵션 분기(요청 5)
+      // 수강명 옵션 분기
       if(f.id === "courseName"){
         const all = CONFIG.options.courseNames.slice();
 
@@ -516,7 +542,7 @@ function renderFields(){
         const mappedLoc = CONFIG.courseToLocation[coursePicked];
         const lock = (state.typeId === "consultTalk") || (!!mappedLoc && coursePicked !== "기타(직접입력)");
         if(lock){
-          ctrl.value = (state.typeId === "consultTalk") ? "6층" : mappedLoc;
+          ctrl.value = (state.typeId === "consultTalk") ? "6층 (상담/로비)" : mappedLoc;
           state.values.location = ctrl.value;
           ctrl.disabled = true;
         } else {
@@ -562,6 +588,7 @@ function renderFields(){
 
       if(f.id === "courseName"){
         const picked = (state.values.courseName || "").trim();
+
         const mapped = CONFIG.courseToLocation[picked];
         if(mapped && picked !== "기타(직접입력)"){
           state.values.location = mapped;
@@ -603,7 +630,7 @@ function buildVars(){
   const isCourseMapped = !!mappedLoc;
 
   if(state.typeId === "consultTalk"){
-    v.location = "6층";
+    v.location = "6층 (상담/로비)";
   } else {
     if(isCourseMapped && coursePicked !== "기타(직접입력)") v.location = mappedLoc;
   }
@@ -631,8 +658,10 @@ function buildVars(){
 function applyTemplate(str, vars){
   let out = str.replace(/\{([a-zA-Z0-9_]+)\}/g, (_, key) => (vars[key] ?? "").toString());
 
+  // 빈 괄호 제거
   out = out.replace(/\(\s*\)/g, "");
 
+  // 값 없는 라인 제거
   out = out.split("\n").filter(line => {
     const trimmed = line.trim();
     if(trimmed === "") return true;
@@ -641,6 +670,7 @@ function applyTemplate(str, vars){
     return true;
   }).join("\n");
 
+  // 연속 빈줄 정리
   out = out.replace(/\n{3,}/g, "\n\n");
 
   return out.trim() + "\n";
@@ -716,7 +746,7 @@ document.getElementById("fillDemoBtn").addEventListener("click", () => {
   state.values.location = "8층 803호";
 
   const timeOpts = getTimeOptions();
-  state.values.timeSlot = timeOpts[0] || "오후 6시 30분";
+  state.values.timeSlot = timeOpts[0] || "오전 9시 30분";
   state.values.timeCustom = "";
 
   state.values.amount = "31만원";
