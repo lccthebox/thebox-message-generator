@@ -63,6 +63,7 @@
     <div class="tabs">
       <button id="tabMsg" class="tabbtn active">메시지 생성기</button>
       <button id="tabFee" class="tabbtn">수강료 계산기</button>
+      <button class="tabBtn" data-view="refund">수강료 환불 계산기</button>
     </div>
   </div>
 
@@ -192,6 +193,81 @@
       </div>
     </div>
   </section>
+
+<div id="view-refund" class="view" style="display:none;">
+  <div class="grid">
+    <div class="card">
+      <h2>환불 계산기</h2>
+
+      <div class="row">
+        <label>구분</label>
+        <select id="rf_kind">
+          <option value="academy">아카데미</option>
+          <option value="study">스터디</option>
+        </select>
+      </div>
+
+      <div id="rf_academyFields">
+        <div class="row">
+          <label>강의(그룹)</label>
+          <select id="rf_teacherGroup"></select>
+        </div>
+
+        <div class="row">
+          <label>결제 타입</label>
+          <select id="rf_payType">
+            <option value="new">신규/복귀</option>
+            <option value="ext">연장</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label>결제 회차(N)</label>
+          <input id="rf_N" type="number" min="1" max="16" placeholder="예: 12" />
+        </div>
+      </div>
+
+      <div id="rf_studyFields" style="display:none;">
+        <div class="row">
+          <label>상품(N)</label>
+          <select id="rf_studyPack">
+            <option value="8">8회</option>
+            <option value="16">16회</option>
+            <option value="32">32회</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>사용 회차(U)</label>
+        <input id="rf_U" type="number" min="0" placeholder="예: 7" />
+      </div>
+
+      <div class="row">
+        <label>실결제금액(선택)</label>
+        <input id="rf_paidCustom" type="text" placeholder="비우면 기준가로 자동 계산" />
+      </div>
+      <div class="muted" style="margin-top:-4px;">
+        환불구간: U/N &lt; 1/3 → 2/3 환불, 1/3~1/2 미만 → 1/2 환불, 1/2 이상 → 0원
+      </div>
+
+      <div class="actions">
+        <button id="rf_copyBtn">환불금액 복사</button>
+        <button id="rf_resetBtn" class="secondary">초기화</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>결과</h2>
+      <pre id="rf_out" style="min-height:320px;"></pre>
+      <div class="muted" style="margin-top:10px;">
+        출력은 “환불금액”을 최우선으로 보여주고, 아래에 계산 근거를 같이 표시합니다.
+      </div>
+    </div>
+  </div>
+</div>
+
+  
 </div>
 
 <script>
@@ -1272,6 +1348,224 @@ document.getElementById("resetFeeBtn").addEventListener("click", ()=>{
 renderFeeTeacher();
 updateDiscUI();
 updateFeeCategoryUI();
+
+  <script>
+/** =========================
+ * 환불 계산기 (B안 / 2-A: 전체 N 기준 1회 적용)
+ * ========================= */
+
+const RF_PRICE = {
+  academy: {
+    // 1) 설린/유나/라일리/제인/티나
+    group_main: {
+      label: "설린 / 유나 / 라일리 / 제인 / 티나",
+      new: { P8: 170000, P16: 300000 },
+      ext: { P8: 165000, P16: 290000 },
+    },
+    // 2) 제임스
+    group_james: {
+      label: "제임스",
+      new: { P8: 190000, P16: 320000 },
+      ext: { P8: 185000, P16: 310000 },
+    },
+    // 3) 크리스
+    group_chris: {
+      label: "크리스",
+      new: { P8: 180000, P16: 310000 },
+      ext: { P8: 175000, P16: 300000 },
+    },
+    // 4) 코트니
+    group_courtney: {
+      label: "코트니",
+      new: { P8: 190000, P16: 340000 },
+      ext: { P8: 185000, P16: 330000 },
+    },
+  },
+  study: {
+    packs: {
+      8: 150000,
+      16: 277000,
+      32: 494000,
+    }
+  }
+};
+
+function rf_toInt(v){
+  if(v == null) return NaN;
+  const s = String(v).replace(/[^0-9]/g, "");
+  if(!s) return NaN;
+  return parseInt(s, 10);
+}
+function rf_fmt(n){
+  if(!isFinite(n)) return "";
+  return Math.round(n).toLocaleString("ko-KR");
+}
+
+function rf_refundRate(U, N){
+  if(!isFinite(U) || !isFinite(N) || N <= 0) return 0;
+  const ratio = U / N;
+  if(ratio < 1/3) return 2/3;
+  if(ratio < 1/2) return 1/2;
+  return 0;
+}
+
+// B안 / 2-A: N 기준 1번 적용
+function rf_calcPayAcademy(P8, P16, N){
+  // N<=8: P8*(N/8)
+  // N>8: P8 + (P16-P8)*((N-8)/8)
+  if(N <= 8){
+    return P8 * (N/8);
+  }
+  const extra8 = (P16 - P8);
+  return P8 + extra8 * ((N - 8)/8);
+}
+
+function rf_buildTeacherOptions(){
+  const sel = document.getElementById("rf_teacherGroup");
+  sel.innerHTML = "";
+  Object.entries(RF_PRICE.academy).forEach(([key, obj])=>{
+    const opt = document.createElement("option");
+    opt.value = key;
+    opt.textContent = obj.label;
+    sel.appendChild(opt);
+  });
+}
+
+// UI elements
+const rf_kind = document.getElementById("rf_kind");
+const rf_academyFields = document.getElementById("rf_academyFields");
+const rf_studyFields = document.getElementById("rf_studyFields");
+const rf_teacherGroup = document.getElementById("rf_teacherGroup");
+const rf_payType = document.getElementById("rf_payType");
+const rf_N = document.getElementById("rf_N");
+const rf_studyPack = document.getElementById("rf_studyPack");
+const rf_U = document.getElementById("rf_U");
+const rf_paidCustom = document.getElementById("rf_paidCustom");
+const rf_out = document.getElementById("rf_out");
+
+function rf_syncFields(){
+  const kind = rf_kind.value;
+  if(kind === "academy"){
+    rf_academyFields.style.display = "";
+    rf_studyFields.style.display = "none";
+  } else {
+    rf_academyFields.style.display = "none";
+    rf_studyFields.style.display = "";
+  }
+  rf_update();
+}
+
+function rf_update(){
+  const kind = rf_kind.value;
+
+  let N;
+  let payBase;
+  let titleLine = "";
+
+  if(kind === "academy"){
+    const groupKey = rf_teacherGroup.value;
+    const payType = rf_payType.value; // new/ext
+    const group = RF_PRICE.academy[groupKey];
+    N = parseInt(rf_N.value, 10);
+
+    const P8 = group?.[payType]?.P8;
+    const P16 = group?.[payType]?.P16;
+
+    if(!isFinite(N) || N <= 0){
+      rf_out.textContent = "결제 회차(N)를 입력하세요.\n";
+      return;
+    }
+    if(N > 16) {
+      rf_out.textContent = "현재 아카데미 환불 계산은 N 최대 16회 기준으로 설계되어 있습니다.\n(16회 초과는 별도 규칙이 필요합니다)\n";
+      return;
+    }
+
+    payBase = rf_calcPayAcademy(P8, P16, N);
+    titleLine = `아카데미 / ${group.label} / ${payType === "new" ? "신규/복귀" : "연장"}`;
+  } else {
+    N = parseInt(rf_studyPack.value, 10);
+    payBase = RF_PRICE.study.packs[N];
+    titleLine = `스터디 / ${N}회`;
+  }
+
+  const U = parseInt(rf_U.value, 10);
+  if(!isFinite(U) || U < 0){
+    rf_out.textContent = "사용 회차(U)를 입력하세요.\n";
+    return;
+  }
+  if(U > N){
+    rf_out.textContent = `사용 회차(U)는 결제 회차(N=${N})를 초과할 수 없습니다.\n`;
+    return;
+  }
+
+  // 실결제금액(선택) 우선
+  const paidCustom = rf_toInt(rf_paidCustom.value);
+  const pay = isFinite(paidCustom) ? paidCustom : payBase;
+
+  const r = rf_refundRate(U, N);
+  const refund = Math.round(pay * r);
+  const ratio = (N > 0) ? (U / N) : 0;
+
+  rf_out.textContent =
+`[${titleLine}]
+- 결제 회차(N): ${N}
+- 사용 회차(U): ${U}
+- 사용비율(U/N): ${(ratio*100).toFixed(1)}%
+- 환불율: ${Math.round(r*100)}%
+
+- 기준 결제금액(자동): ${rf_fmt(payBase)}원
+- 실결제금액(적용): ${rf_fmt(pay)}원
+
+✅ 환불금액: ${rf_fmt(refund)}원
+`;
+}
+
+// copy/reset
+document.getElementById("rf_copyBtn").addEventListener("click", async ()=>{
+  const text = (() => {
+    const m = rf_out.textContent.match(/✅ 환불금액:\s*([0-9,]+)원/);
+    return m ? `${m[1]}원` : rf_out.textContent;
+  })();
+  try{
+    await navigator.clipboard.writeText(text);
+    alert("복사 완료");
+  }catch(e){
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+    alert("복사 완료");
+  }
+});
+
+document.getElementById("rf_resetBtn").addEventListener("click", ()=>{
+  rf_kind.value = "academy";
+  rf_payType.value = "new";
+  rf_N.value = "";
+  rf_U.value = "";
+  rf_studyPack.value = "8";
+  rf_paidCustom.value = "";
+  rf_syncFields();
+});
+
+// listeners
+rf_kind.addEventListener("change", rf_syncFields);
+rf_teacherGroup.addEventListener("change", rf_update);
+rf_payType.addEventListener("change", rf_update);
+rf_N.addEventListener("input", rf_update);
+rf_studyPack.addEventListener("change", rf_update);
+rf_U.addEventListener("input", rf_update);
+rf_paidCustom.addEventListener("input", rf_update);
+
+// init
+rf_buildTeacherOptions();
+rf_syncFields();
+</script>
+
+
+  
 </script>
 </body>
 </html>
