@@ -12,9 +12,6 @@
       --muted:#6b7280;
       --line:#e5e7eb;
       --accent:#111827;
-      --chip:#f3f4f6;
-      --chipOn:#111827;
-      --chipOnText:#ffffff;
       --shadow:0 10px 30px rgba(17,24,39,.06);
       --radius:16px;
     }
@@ -26,153 +23,75 @@
       color:var(--text);
     }
     .wrap{max-width:1200px;margin:22px auto;padding:0 16px}
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      margin-bottom:14px;
-    }
-    .title{
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-    }
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     h1{font-size:30px;line-height:1.1;margin:0}
     .badge{
       font-size:13px;color:var(--accent);background:#eef2ff;border:1px solid #e0e7ff;
       padding:6px 10px;border-radius:999px;
     }
-    .tabs{
-      display:flex;gap:8px;align-items:center;
-    }
+    .tabs{display:flex;gap:8px;align-items:center}
     .tabbtn{
-      border:1px solid var(--line);
-      background:#fff;
-      padding:10px 14px;
-      border-radius:999px;
-      font-weight:700;
-      cursor:pointer;
-      color:var(--text);
+      border:1px solid var(--line);background:#fff;padding:10px 14px;border-radius:999px;
+      font-weight:700;cursor:pointer;color:var(--text);
     }
-    .tabbtn.active{
-      background:var(--accent);
-      color:#fff;
-      border-color:var(--accent);
-    }
-
+    .tabbtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
     .panel{display:none}
     .panel.active{display:block}
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:16px;
-      align-items:start;
-    }
-    @media (max-width: 960px){
-      .grid{grid-template-columns:1fr}
-    }
-
+    .grid{display:grid;grid-template-columns: 1fr 1fr;gap:16px;align-items:start}
+    @media (max-width: 960px){.grid{grid-template-columns:1fr}}
     .card{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:18px;
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:18px;
     }
-    .card h2{
-      margin:0 0 12px 0;
-      font-size:18px;
-    }
-    .sectionTitle{
-      margin:18px 0 10px 0;
-      font-weight:800;
-    }
-    .help{
-      font-size:12px;color:var(--muted);margin-top:6px;
-    }
-
+    .card h2{margin:0 0 12px 0;font-size:18px}
+    .sectionTitle{margin:18px 0 10px 0;font-weight:800}
+    .help{font-size:12px;color:var(--muted);margin-top:6px}
     .chips{display:flex;flex-wrap:wrap;gap:10px}
     .chip{
       display:inline-flex;align-items:center;gap:8px;
-      padding:10px 12px;border-radius:999px;
-      border:1px solid var(--line);
-      background:#fff;
-      cursor:pointer;
-      user-select:none;
+      padding:10px 12px;border-radius:999px;border:1px solid var(--line);
+      background:#fff;cursor:pointer;user-select:none;
     }
     .chip input{display:none}
-    .dot{
-      width:16px;height:16px;border-radius:999px;border:2px solid #c7cdd8;
-      display:inline-block;
-    }
-    .chip input:checked + .dot{border-color:var(--chipOn);background:var(--chipOn)}
+    .dot{width:16px;height:16px;border-radius:999px;border:2px solid #c7cdd8;display:inline-block}
+    .chip input:checked + .dot{border-color:var(--accent);background:var(--accent)}
     .check{
       width:16px;height:16px;border-radius:4px;border:2px solid #c7cdd8;
-      display:inline-flex;align-items:center;justify-content:center;
-      background:#fff;
+      display:inline-flex;align-items:center;justify-content:center;background:#fff;
     }
     .chip input:checked + .check{border-color:#22c55e;background:#22c55e}
     .tick{
-      width:10px;height:10px;display:block;
-      background:#fff;
+      width:10px;height:10px;display:block;background:#fff;
       clip-path: polygon(14% 50%, 0 64%, 38% 100%, 100% 26%, 86% 14%, 38% 74%);
       opacity:0;
     }
     .chip input:checked + .check .tick{opacity:1}
-
     .form{
-      display:grid;
-      grid-template-columns: 120px 1fr;
-      gap:10px 12px;
-      align-items:center;
-      margin-top:6px;
+      display:grid;grid-template-columns: 120px 1fr;gap:10px 12px;align-items:center;margin-top:6px;
     }
     .label{font-size:13px;color:var(--muted)}
     input[type="text"], input[type="number"], select{
-      width:100%;
-      padding:12px 12px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:#fff;
-      outline:none;
-      font-size:14px;
+      width:100%;padding:12px 12px;border-radius:12px;border:1px solid var(--line);
+      background:#fff;outline:none;font-size:14px;
     }
     input[readonly]{background:#f9fafb}
     .btnrow{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
     .btn{
-      padding:12px 14px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:#fff;
-      cursor:pointer;
-      font-weight:800;
+      padding:12px 14px;border-radius:12px;border:1px solid var(--line);
+      background:#fff;cursor:pointer;font-weight:800;
     }
-    .btn.primary{
-      background:var(--accent);
-      border-color:var(--accent);
-      color:#fff;
-    }
-
-    .previewWrap{
-      display:flex;flex-direction:column;gap:10px;
-    }
+    .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+    .previewWrap{display:flex;flex-direction:column;gap:10px}
     .previewTitle{font-weight:900}
     .preview{
-      width:100%;
-      min-height:520px;
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:14px;
-      padding:14px;
-      white-space:pre-wrap;
+      width:100%;min-height:520px;border:1px solid var(--line);background:#fff;border-radius:14px;
+      padding:14px;white-space:pre-wrap;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size:13px;
-      line-height:1.6;
-      overflow:auto;
+      font-size:13px;line-height:1.6;overflow:auto;
     }
-    .note{
-      font-size:12px;color:var(--muted);
-    }
-    .inline{
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-    }
+    .note{font-size:12px;color:var(--muted)}
+    .inline{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .inline .chip{padding:8px 10px}
   </style>
 </head>
@@ -352,7 +271,7 @@
             <br>- 1/3 초과 ~ 1/2 이하 : 결제금액 × 1/2
             <br>- 1/2 초과 : 0원
             <br><br>
-            B안(아카데미 + 8회 초과 결제): 사용 시작 후에는 첫 8회 금액은 제외하고, (결제금액 - 8회금액)만 위 구간을 적용합니다.
+            B안(아카데미 + 8회 초과 결제): 사용 시작 후에는 첫 8회 금액을 제외하고, (결제금액 - 8회금액)만 위 구간을 적용합니다.
           </div>
 
           <div class="btnrow">
@@ -407,6 +326,11 @@ const clamp = (x, a, b) => Math.min(Math.max(x, a), b);
 /* =========================================================
    (A) 메시지 생성기 데이터/로직
 ========================================================= */
+
+// 주소는 “상담톡”에서 입력 없이 고정으로 사용됩니다.
+// 필요하면 여기만 수정하세요.
+const THEBOX_ADDRESS_FIXED = 'cafe 봄봄 옆 입구(엘리베이터)로 오셔서 6층으로 올라와주세요.';
+
 const MSG_TYPES = [
   { key:'audit', label:'청강' },
   { key:'consult', label:'상담톡' },
@@ -437,6 +361,7 @@ const ACADEMY_COURSES = [
   '제임스 진짜영어',
   '크리스 미디어영어',
   '코트니 Go-to영어',
+  '짜이뤼 중국어',
 ];
 
 const STUDY_COURSES = [
@@ -454,6 +379,7 @@ const LOCATIONS = {
   '제임스 진짜영어': ['7층 703호'],
   '크리스 미디어영어': ['8층 803호'],
   '코트니 Go-to영어': ['8층 807호'],
+  '짜이뤼 중국어': ['7층 702호'],
   '원어민 회화스터디': ['6층'],
 };
 
@@ -478,6 +404,7 @@ const DEFAULT_PRICE_TEXT = {
     '제임스 진짜영어': '8회(주2회) 19만원, 16회(주4회) 32만원',
     '크리스 미디어영어': '8회(주2회) 18만원, 16회(주4회) 31만원',
     '코트니 Go-to영어': '8회(1개월) 19만원, 16회(2개월) 34만원',
+    '짜이뤼 중국어': '8회(1개월) 15만원, 16회(2개월) 28만원',
   },
   academyResit: {
     '설린 도전영어': '8회(1개월) 16.5만원, 16회(2개월) 29만원',
@@ -490,6 +417,7 @@ const DEFAULT_PRICE_TEXT = {
     '제임스 진짜영어': '8회(주2회) 18.5만원, 16회(주4회) 31만원',
     '크리스 미디어영어': '8회(주2회) 18만원, 16회(주4회) 31만원',
     '코트니 Go-to영어': '8회(1개월) 18.5만원, 16회(2개월) 33만원',
+    '짜이뤼 중국어': '8회(1개월) 14.5만원, 16회(2개월) 27만원',
   },
   study: {
     '원어민 회화스터디': '8회 15만원, 16회 277,000원, 32회 494,000원'
@@ -498,11 +426,11 @@ const DEFAULT_PRICE_TEXT = {
 
 const DEFAULT_SECTIONS_BY_TYPE = {
   audit: ['enroll'],
-  consult: [], // ✅ 상담톡은 섹션 선택 없이 고정 출력
-  study: ['enroll','pay','discount','cafe'], // ✅ 스터디에서 schedule 섹션 삭제
+  consult: [], // 상담톡은 고정 템플릿(섹션 선택 없음)
+  study: ['enroll','pay','discount','cafe'], // 스터디에서 schedule 섹션 삭제
   academy: ['enroll','pay','discount','schedule'],
   academyResit: ['enroll','pay','discount','schedule'],
-  credit: [], // credit은 별도 체크 3종
+  credit: [],
   cert: ['certFixed'],
   nativeInquiry: ['nativeInquiryFixed']
 };
@@ -511,6 +439,22 @@ const DEFAULT_SECTIONS_BY_TYPE = {
 const BLOCKS = {
   header: `안녕하세요 더박스입니다😊
 `,
+
+  // ✅ 상담톡(고정 템플릿)
+  consultHeader:
+`안녕하세요. 더박스입니다. 😊
+예약하신 상담 내역 한번 더 안내드릴께요!
+`,
+  consultBlock:
+`- 예약일자 : {consultDate}
+- 예약시간 : {consultTime}
+
+▪ 주소: {address}
+시내 특성상 따로 주차장은 마련되어있지 않아, 주변 민영/공영 주차장 이용해주셔야 합니다.
+
+※ 상담은 6층으로 바로 올라와 주시면 되셔요! (카페 봄봄 옆 입구로 오시면 엘리베이터 이용 가능하십니다.) 혹시 변동 사항 있으시면 말씀해주세요~ ☺☺
+`,
+
   startAcademy: `시작하시는 수업 안내 드리겠습니다!
 `,
   startResit: `재수강 안내드리겠습니다. 아래 금액은 재수강 연장 등록기간에만 적용되는 금액입니다.
@@ -550,19 +494,6 @@ https://thebox.imweb.me/academyschedule
 다녀가 주셔서 감사합니다! 혹시 변동 및 추가 문의 사항 있으시면 편하게 말씀해주세요 :)
 `,
 
-  // ✅ 상담톡(고정 템플릿 + 입력값 치환)
-  consultHeader: `안녕하세요. 더박스입니다. 😊
-예약하신 상담 내역 한번 더 안내드릴께요!
-`,
-  consultBlock: `- 예약일자 : {consultDate}
-- 예약시간 : {consultTime}
-
-▪ 주소: {address}
-시내 특성상 따로 주차장은 마련되어있지 않아, 주변 민영/공영 주차장 이용해주셔야 합니다.
-
-※ 상담은 6층으로 바로 올라와 주시면 되셔요! (카페 봄봄 옆 입구로 오시면 엘리베이터 이용 가능하십니다.) 혹시 변동 사항 있으시면 말씀해주세요~ ☺☺
-`,
-
   // 수강증(고정)
   certFixed: `안녕하세요 😊
 수강증 발급을 위해 아래 항목들 작성 부탁드릴게요!
@@ -578,6 +509,7 @@ https://thebox.imweb.me/academyschedule
 작성해주시면 확인 후 수강증 이메일로 발송 도와드리겠습니다 :)
 감사합니다!
 `,
+
   // 원어민 문의(고정)
   nativeInquiryFixed: `Hello, thank you for reaching out to us!
 
@@ -596,6 +528,7 @@ const msgState = {
   type: 'study',
   sections: new Set(DEFAULT_SECTIONS_BY_TYPE.study),
   fields: {
+    // 일반
     month: '1',
     day: '10',
     time: TIME_OPTIONS.study[0],
@@ -603,14 +536,18 @@ const msgState = {
     loc: LOCATIONS[STUDY_COURSES[0]][0],
     amount: DEFAULT_PRICE_TEXT.study[STUDY_COURSES[0]],
 
-    // ✅ 상담톡 필드
-    consultDate: '',
-    consultTime: '',
-    address: ''
+    // 상담톡 전용
+    consultMonth: '1',
+    consultDay: '10',
+    consultWeekday: '월',      // 버튼(월/화/수/목/토/일)
+    consultAmPm: '오전',       // 오전/오후
+    consultHour: '10',         // 1~12
+    consultMin: '00',          // 00/15/30/45
+    consultTimeOther: ''       // 기타 입력(있으면 이 값 우선)
   }
 };
 
-/* ========= 메시지 생성기: UI 렌더 ========= */
+/* ========= 메시지 생성기: UI ========= */
 const typeChips = document.getElementById('typeChips');
 const sectionChips = document.getElementById('sectionChips');
 const fieldsWrap = document.getElementById('fieldsWrap');
@@ -649,9 +586,14 @@ function renderTypeChips(){
         msgState.fields.amount = (DEFAULT_PRICE_TEXT[msgState.type][first] || '');
       }
       if (msgState.type === 'consult'){
-        msgState.fields.consultDate = msgState.fields.consultDate || '';
-        msgState.fields.consultTime = msgState.fields.consultTime || '';
-        msgState.fields.address = msgState.fields.address || '';
+        // 상담톡: 섹션 없음, 기본값 유지
+        msgState.fields.consultMonth = msgState.fields.consultMonth || '1';
+        msgState.fields.consultDay = msgState.fields.consultDay || '10';
+        msgState.fields.consultWeekday = msgState.fields.consultWeekday || '월';
+        msgState.fields.consultAmPm = msgState.fields.consultAmPm || '오전';
+        msgState.fields.consultHour = msgState.fields.consultHour || '10';
+        msgState.fields.consultMin = msgState.fields.consultMin || '00';
+        msgState.fields.consultTimeOther = msgState.fields.consultTimeOther || '';
       }
 
       renderSections();
@@ -665,14 +607,14 @@ function renderTypeChips(){
 function renderSections(){
   sectionChips.innerHTML = '';
 
-  // ✅ 상담톡: 섹션 선택 없이 고정
+  // 상담톡: 섹션 선택 없이 고정
   if (msgState.type === 'consult'){
     const lab = document.createElement('label');
     lab.className = 'chip';
     lab.innerHTML = `
       <input type="checkbox" checked disabled>
       <span class="check"><span class="tick"></span></span>
-      <span>상담톡 안내</span>
+      <span>상담톡 내용(고정)</span>
     `;
     sectionChips.appendChild(lab);
     return;
@@ -719,7 +661,7 @@ function renderSections(){
   }
 
   MSG_SECTIONS.forEach(s=>{
-    // ✅ 스터디에서 schedule 섹션 자체 삭제(숨김)
+    // 스터디에서 선생님 스케쥴 안내 섹션 삭제(숨김)
     if (msgState.type === 'study' && s.key === 'schedule') return;
 
     const checked = msgState.sections.has(s.key);
@@ -740,39 +682,115 @@ function renderSections(){
   });
 }
 
+function fieldVisible(fieldKey){
+  const t = String(msgState.type||'').trim();
+
+  // 상담톡: 전용 필드만
+  if (t === 'consult'){
+    return ['consultMonth','consultDay','consultWeekday','consultAmPm','consultHour','consultMin','consultTimeOther'].includes(fieldKey);
+  }
+
+  // 고정 타입들
+  if (t === 'cert' || t === 'nativeInquiry') return false;
+
+  // 스터디 크레딧: 별도 필드
+  if (t === 'credit'){
+    return ['creditRemainCount','creditExpireMonth','creditExpireDay','creditExtendPlan','creditExtendOther'].includes(fieldKey);
+  }
+
+  const needsCommon = (
+    msgState.sections.has('enroll') ||
+    msgState.sections.has('pay') ||
+    msgState.sections.has('discount') ||
+    msgState.sections.has('cafe') ||
+    msgState.sections.has('schedule')
+  );
+  if (!needsCommon) return false;
+
+  if (['month','day','time','course','loc'].includes(fieldKey)) return true;
+
+  if (fieldKey === 'amount'){
+    return msgState.sections.has('pay') && (t === 'study' || t === 'academy' || t === 'academyResit');
+  }
+
+  return false;
+}
+
 function renderFields(){
   fieldsWrap.innerHTML = '';
 
-  // ✅ 상담톡: 전용 입력 3개
+  // 상담톡 전용 입력 UI
   if (msgState.type === 'consult'){
-    const rows = [];
+    const add = (label, node)=>{
+      const l = document.createElement('div'); l.className='label'; l.textContent=label;
+      const w = document.createElement('div'); w.appendChild(node);
+      fieldsWrap.appendChild(l); fieldsWrap.appendChild(w);
+    };
+
+    // 예약 월/일 (숫자)
+    const m = document.createElement('input');
+    m.type='number'; m.min='1'; m.value = msgState.fields.consultMonth || '';
+    m.addEventListener('input', ()=>{ msgState.fields.consultMonth = m.value; renderPreview(); });
+    add('예약 월', m);
 
     const d = document.createElement('input');
-    d.type = 'text';
-    d.placeholder = '예: 1월 10일(금)';
-    d.value = msgState.fields.consultDate || '';
-    d.addEventListener('input', ()=>{ msgState.fields.consultDate = d.value; renderPreview(); });
-    rows.push({label:'예약일자', el:d});
+    d.type='number'; d.min='1'; d.value = msgState.fields.consultDay || '';
+    d.addEventListener('input', ()=>{ msgState.fields.consultDay = d.value; renderPreview(); });
+    add('예약 일', d);
 
-    const t = document.createElement('input');
-    t.type = 'text';
-    t.placeholder = '예: 오후 2시';
-    t.value = msgState.fields.consultTime || '';
-    t.addEventListener('input', ()=>{ msgState.fields.consultTime = t.value; renderPreview(); });
-    rows.push({label:'예약시간', el:t});
-
-    const a = document.createElement('input');
-    a.type = 'text';
-    a.placeholder = '예: (주소 입력)';
-    a.value = msgState.fields.address || '';
-    a.addEventListener('input', ()=>{ msgState.fields.address = a.value; renderPreview(); });
-    rows.push({label:'주소', el:a});
-
-    rows.forEach(r=>{
-      const l = document.createElement('div'); l.className='label'; l.textContent=r.label;
-      const w = document.createElement('div'); w.appendChild(r.el);
-      fieldsWrap.appendChild(l); fieldsWrap.appendChild(w);
+    // 요일 버튼(월/화/수/목/토/일)
+    const weekWrap = document.createElement('div');
+    weekWrap.className = 'inline';
+    const weekdays = ['월','화','수','목','토','일'];
+    weekdays.forEach(wk=>{
+      const lab = document.createElement('label');
+      lab.className = 'chip';
+      lab.style.padding = '8px 10px';
+      lab.innerHTML = `
+        <input type="radio" name="consultWeekday" value="${wk}" ${msgState.fields.consultWeekday===wk?'checked':''}>
+        <span class="dot"></span>
+        <span>${wk}</span>
+      `;
+      lab.querySelector('input').addEventListener('change', ()=>{
+        msgState.fields.consultWeekday = wk;
+        renderPreview();
+      });
+      weekWrap.appendChild(lab);
     });
+    add('예약 요일', weekWrap);
+
+    // 예약시간: 오전/오후 + 시 + 분
+    const timeRow = document.createElement('div');
+    timeRow.className = 'inline';
+
+    const ampm = document.createElement('select');
+    ampm.innerHTML = `<option value="오전">오전</option><option value="오후">오후</option>`;
+    ampm.value = msgState.fields.consultAmPm || '오전';
+    ampm.addEventListener('change', ()=>{ msgState.fields.consultAmPm = ampm.value; renderPreview(); });
+    timeRow.appendChild(ampm);
+
+    const hour = document.createElement('select');
+    hour.innerHTML = Array.from({length:12}, (_,i)=>`<option value="${i+1}">${i+1}시</option>`).join('');
+    hour.value = msgState.fields.consultHour || '10';
+    hour.addEventListener('change', ()=>{ msgState.fields.consultHour = hour.value; renderPreview(); });
+    timeRow.appendChild(hour);
+
+    const min = document.createElement('select');
+    min.innerHTML = ['00','15','30','45'].map(v=>`<option value="${v}">${v}분</option>`).join('');
+    min.value = msgState.fields.consultMin || '00';
+    min.addEventListener('change', ()=>{ msgState.fields.consultMin = min.value; renderPreview(); });
+    timeRow.appendChild(min);
+
+    add('예약시간', timeRow);
+
+    // 기타 입력(있으면 우선)
+    const other = document.createElement('input');
+    other.type = 'text';
+    other.placeholder = '기타 시간(예: 오후 2시~3시 / 14:10 등). 입력 시 이 값이 우선 적용됩니다.';
+    other.value = msgState.fields.consultTimeOther || '';
+    other.addEventListener('input', ()=>{ msgState.fields.consultTimeOther = other.value; renderPreview(); });
+    add('시간(기타)', other);
+
     return;
   }
 
@@ -796,128 +814,136 @@ function renderFields(){
     }
 
     if (msgState.sections.has('creditInfo')){
-      const i1=document.createElement('input'); i1.type='number'; i1.min='0'; i1.value=msgState.fields.creditRemainCount||''; i1.addEventListener('input',()=>{msgState.fields.creditRemainCount=i1.value;renderPreview();});
-      add('남은 크레딧(회)', i1);
-
-      const i2=document.createElement('input'); i2.type='number'; i2.min='1'; i2.value=msgState.fields.creditExpireMonth||''; i2.addEventListener('input',()=>{msgState.fields.creditExpireMonth=i2.value;renderPreview();});
-      add('만료 월', i2);
-
-      const i3=document.createElement('input'); i3.type='number'; i3.min='1'; i3.value=msgState.fields.creditExpireDay||''; i3.addEventListener('input',()=>{msgState.fields.creditExpireDay=i3.value;renderPreview();});
-      add('만료 일', i3);
+      add('남은 크레딧(회)', 'creditRemainCount', (()=>{ const i=document.createElement('input'); i.type='number'; i.min='0'; i.value=msgState.fields.creditRemainCount||''; i.addEventListener('input',()=>{msgState.fields.creditRemainCount=i.value;renderPreview();}); return i; })());
+      add('만료 월', 'creditExpireMonth', (()=>{ const i=document.createElement('input'); i.type='number'; i.min='1'; i.value=msgState.fields.creditExpireMonth||''; i.addEventListener('input',()=>{msgState.fields.creditExpireMonth=i.value;renderPreview();}); return i; })());
+      add('만료 일', 'creditExpireDay', (()=>{ const i=document.createElement('input'); i.type='number'; i.min='1'; i.value=msgState.fields.creditExpireDay||''; i.addEventListener('input',()=>{msgState.fields.creditExpireDay=i.value;renderPreview();}); return i; })());
     }
 
     if (msgState.sections.has('creditExtend')){
-      const s=document.createElement('select');
-      s.innerHTML = `
-        <option value="16">16회 : 277,000원</option>
-        <option value="32">32회 : 494,000원</option>
-        <option value="other">기타(직접입력)</option>
-      `;
-      s.value = msgState.fields.creditExtendPlan || '16';
-      s.addEventListener('change', ()=>{
-        msgState.fields.creditExtendPlan = s.value;
-        renderFields();
-        renderPreview();
-      });
-      add('연장 옵션', s);
+      add('연장 옵션', 'creditExtendPlan', (()=> {
+        const s=document.createElement('select');
+        s.innerHTML = `
+          <option value="16">16회 : 277,000원</option>
+          <option value="32">32회 : 494,000원</option>
+          <option value="other">기타(직접입력)</option>
+        `;
+        s.value = msgState.fields.creditExtendPlan || '16';
+        s.addEventListener('change', ()=>{
+          msgState.fields.creditExtendPlan = s.value;
+          renderFields();
+          renderPreview();
+        });
+        return s;
+      })());
 
       const plan = msgState.fields.creditExtendPlan || '16';
       if (plan === 'other'){
-        const i=document.createElement('input');
-        i.type='text';
-        i.value=msgState.fields.creditExtendOther||'';
-        i.placeholder='예: 20회 350,000원';
-        i.addEventListener('input',()=>{msgState.fields.creditExtendOther=i.value;renderPreview();});
-        add('기타 금액(직접입력)', i);
+        add('기타 금액(직접입력)', 'creditExtendOther', (()=>{ const i=document.createElement('input'); i.type='text'; i.value=msgState.fields.creditExtendOther||''; i.placeholder='예: 20회 350,000원'; i.addEventListener('input',()=>{msgState.fields.creditExtendOther=i.value;renderPreview();}); return i; })());
       }
     }
+
     return;
   }
 
   // 공통 필드 렌더
-  const needsCommon = (msgState.sections.has('enroll') || msgState.sections.has('pay') || msgState.sections.has('discount') || msgState.sections.has('cafe') || msgState.sections.has('schedule'));
-  if (!needsCommon){
-    fieldsWrap.innerHTML = `<div class="label" style="grid-column:1/3;color:var(--muted);">선택된 섹션에 입력할 항목이 없습니다.</div>`;
-    return;
-  }
-
   const rows = [];
   const addRow = (label, el) => rows.push({label, el});
 
-  const monthI = document.createElement('input'); monthI.type='number'; monthI.min='1'; monthI.value=msgState.fields.month||''; monthI.addEventListener('input', ()=>{msgState.fields.month=monthI.value; renderPreview();});
-  addRow('시작 월', monthI);
+  if (fieldVisible('month')){
+    const i = document.createElement('input'); i.type='number'; i.min='1'; i.value=msgState.fields.month||'';
+    i.addEventListener('input', ()=>{msgState.fields.month=i.value; renderPreview();});
+    addRow('시작 월', i);
+  }
+  if (fieldVisible('day')){
+    const i = document.createElement('input'); i.type='number'; i.min='1'; i.value=msgState.fields.day||'';
+    i.addEventListener('input', ()=>{msgState.fields.day=i.value; renderPreview();});
+    addRow('시작 일', i);
+  }
 
-  const dayI = document.createElement('input'); dayI.type='number'; dayI.min='1'; dayI.value=msgState.fields.day||''; dayI.addEventListener('input', ()=>{msgState.fields.day=dayI.value; renderPreview();});
-  addRow('시작 일', dayI);
+  if (fieldVisible('time')){
+    const s = document.createElement('select');
+    let opts = [];
+    if (msgState.type === 'study') opts = TIME_OPTIONS.study;
+    else if (msgState.type === 'academy' || msgState.type === 'academyResit') opts = TIME_OPTIONS.academyCommon;
+    else opts = TIME_OPTIONS.academyCommon;
 
-  const timeS = document.createElement('select');
-  let opts = [];
-  if (msgState.type === 'study') opts = TIME_OPTIONS.study;
-  else if (msgState.type === 'academy' || msgState.type === 'academyResit') opts = TIME_OPTIONS.academyCommon;
-  else opts = TIME_OPTIONS.academyCommon;
-  timeS.innerHTML = opts.map(v=>`<option value="${v}">${v}</option>`).join('');
-  timeS.value = msgState.fields.time || opts[0];
-  timeS.addEventListener('change', ()=>{
-    msgState.fields.time = timeS.value;
-    renderPreview();
-    renderFields();
-  });
-  addRow('시간', timeS);
+    s.innerHTML = opts.map(v=>`<option value="${v}">${v}</option>`).join('');
+    s.value = msgState.fields.time || opts[0];
+    s.addEventListener('change', ()=>{
+      msgState.fields.time = s.value;
+      renderPreview();
+      renderFields();
+    });
+    addRow('시간', s);
+  }
 
-  const courseS = document.createElement('select');
-  let list = [];
-  if (msgState.type === 'study') list = STUDY_COURSES;
-  else if (msgState.type === 'academy' || msgState.type === 'academyResit') list = ACADEMY_COURSES;
-  else list = ACADEMY_COURSES;
-  courseS.innerHTML = list.map(v=>`<option value="${v}">${v}</option>`).join('');
-  courseS.value = msgState.fields.course || list[0];
-  courseS.addEventListener('change', ()=>{
-    msgState.fields.course = courseS.value;
-    const locList = LOCATIONS[courseS.value] || [''];
-    msgState.fields.loc = locList[0];
+  if (fieldVisible('course')){
+    const s = document.createElement('select');
+    let list = [];
+    if (msgState.type === 'study') list = STUDY_COURSES;
+    else if (msgState.type === 'academy' || msgState.type === 'academyResit') list = ACADEMY_COURSES;
+    else list = ACADEMY_COURSES;
 
-    if (msgState.type === 'academy' || msgState.type === 'academyResit'){
-      msgState.fields.amount = (DEFAULT_PRICE_TEXT[msgState.type][courseS.value] || '');
-    }
-    if (msgState.type === 'study'){
-      msgState.fields.amount = (DEFAULT_PRICE_TEXT.study[courseS.value] || '');
-    }
+    s.innerHTML = list.map(v=>`<option value="${v}">${v}</option>`).join('');
+    s.value = msgState.fields.course || list[0];
 
-    renderFields();
-    renderPreview();
-  });
-  addRow('수강명', courseS);
+    s.addEventListener('change', ()=>{
+      msgState.fields.course = s.value;
 
-  const locS = document.createElement('select');
-  const locList = LOCATIONS[msgState.fields.course] || [''];
-  locS.innerHTML = locList.map(v=>`<option value="${v}">${v}</option>`).join('');
-  locS.value = msgState.fields.loc || locList[0];
-  locS.addEventListener('change', ()=>{
-    msgState.fields.loc = locS.value;
-    renderPreview();
-    renderFields();
-  });
-  addRow('위치', locS);
+      const locList = LOCATIONS[s.value] || [''];
+      msgState.fields.loc = locList[0];
 
-  if (msgState.sections.has('pay') && (msgState.type === 'study' || msgState.type === 'academy' || msgState.type === 'academyResit')){
-    const amt = document.createElement('input');
-    amt.type='text';
-    amt.value = msgState.fields.amount || '';
-    amt.placeholder = '예: 8회(1개월) 17만원, 16회(2개월) 30만원 / 280,000';
-    amt.addEventListener('input', ()=>{
-      msgState.fields.amount = amt.value;
+      if (msgState.type === 'academy' || msgState.type === 'academyResit'){
+        msgState.fields.amount = (DEFAULT_PRICE_TEXT[msgState.type][s.value] || '');
+      }
+      if (msgState.type === 'study'){
+        msgState.fields.amount = (DEFAULT_PRICE_TEXT.study[s.value] || '');
+      }
+
+      renderFields();
       renderPreview();
     });
-    amt.addEventListener('blur', ()=>{
-      const raw = String(amt.value||'').trim();
+    addRow('수강명', s);
+  }
+
+  if (fieldVisible('loc')){
+    const s = document.createElement('select');
+    const course = msgState.fields.course;
+    const locList = LOCATIONS[course] || [''];
+    s.innerHTML = locList.map(v=>`<option value="${v}">${v}</option>`).join('');
+    s.value = msgState.fields.loc || locList[0];
+    s.addEventListener('change', ()=>{
+      msgState.fields.loc = s.value;
+      renderPreview();
+      renderFields();
+    });
+    addRow('위치', s);
+  }
+
+  if (fieldVisible('amount')){
+    const i = document.createElement('input');
+    i.type='text';
+    i.value = msgState.fields.amount || '';
+    i.placeholder = '예: 8회(1개월) 17만원, 16회(2개월) 30만원 / 280,000';
+    i.addEventListener('input', ()=>{
+      msgState.fields.amount = i.value;
+      renderPreview();
+    });
+    i.addEventListener('blur', ()=>{
+      const raw = String(i.value||'').trim();
       if (raw && /^[\d,]+$/.test(raw)){
         const num = Number(onlyDigits(raw));
-        amt.value = moneyFmt(num);
-        msgState.fields.amount = amt.value;
+        i.value = moneyFmt(num);
+        msgState.fields.amount = i.value;
         renderPreview();
       }
     });
-    addRow('금액', amt);
+    addRow('금액', i);
+  }
+
+  if (rows.length === 0){
+    fieldsWrap.innerHTML = `<div class="label" style="grid-column:1/3;color:var(--muted);">선택된 섹션에 입력할 항목이 없습니다.</div>`;
+    return;
   }
 
   rows.forEach(r=>{
@@ -927,18 +953,13 @@ function renderFields(){
   });
 }
 
-function applyVars(template){
+function applyVarsCommon(template){
   const month = String(msgState.fields.month||'').trim();
   const day = String(msgState.fields.day||'').trim();
   const time = String(msgState.fields.time||'').trim();
   const course = String(msgState.fields.course||'').trim();
   const loc = String(msgState.fields.loc||'').trim();
   const amount = String(msgState.fields.amount||'').trim();
-
-  const consultDate = String(msgState.fields.consultDate||'').trim();
-  const consultTime = String(msgState.fields.consultTime||'').trim();
-  const address = String(msgState.fields.address||'').trim();
-
   const date = (month && day) ? `${month}월 ${day}일` : '';
 
   let out = template
@@ -946,15 +967,41 @@ function applyVars(template){
     .replaceAll('{time}', time)
     .replaceAll('{course}', course)
     .replaceAll('{loc}', loc)
-    .replaceAll('{amount}', amount)
+    .replaceAll('{amount}', amount);
+
+  out = out.split('\n').filter(line=>{
+    if (!line.trim()) return true;
+    if (/:\s*$/.test(line)) return false;
+    return true;
+  }).join('\n');
+
+  out = out.replace(/\n{3,}/g, '\n\n');
+  return out.trim() + '\n';
+}
+
+function applyVarsConsult(template){
+  const m = String(msgState.fields.consultMonth||'').trim();
+  const d = String(msgState.fields.consultDay||'').trim();
+  const w = String(msgState.fields.consultWeekday||'').trim();
+
+  const consultDate = (m && d && w) ? `${m}월 ${d}일 ${w}요일` : '';
+
+  const other = String(msgState.fields.consultTimeOther||'').trim();
+  let consultTime = other;
+  if (!consultTime){
+    const ap = String(msgState.fields.consultAmPm||'오전').trim();
+    const h = String(msgState.fields.consultHour||'').trim();
+    const mi = String(msgState.fields.consultMin||'').trim();
+    consultTime = (ap && h && mi) ? `${ap} ${h}시 ${mi}분` : '';
+  }
+
+  let out = template
     .replaceAll('{consultDate}', consultDate)
     .replaceAll('{consultTime}', consultTime)
-    .replaceAll('{address}', address);
+    .replaceAll('{address}', THEBOX_ADDRESS_FIXED);
 
-  // 빈값 있는 줄 제거(치환 후)
   out = out.split('\n').filter(line=>{
-    const t = line.trim();
-    if (!t) return true;
+    if (!line.trim()) return true;
     if (/:\s*$/.test(line)) return false;
     return true;
   }).join('\n');
@@ -964,10 +1011,12 @@ function applyVars(template){
 }
 
 function renderPreview(){
-  // ✅ 상담톡 고정 출력
+  // 상담톡
   if (msgState.type === 'consult'){
-    const txt = (BLOCKS.consultHeader + '\n' + applyVars(BLOCKS.consultBlock)).replace(/\n{3,}/g,'\n\n').trim() + '\n';
-    previewMsg.textContent = txt;
+    const parts = [];
+    parts.push(BLOCKS.consultHeader.trim() + '\n');
+    parts.push(applyVarsConsult(BLOCKS.consultBlock));
+    previewMsg.textContent = parts.join('\n').replace(/\n{3,}/g,'\n\n').trim() + '\n';
     return;
   }
 
@@ -1040,15 +1089,14 @@ function renderPreview(){
   else if (msgState.type === 'study') parts.push(BLOCKS.startStudy);
   else parts.push(BLOCKS.startAcademy);
 
-  // 섹션 순서 고정
   const order = ['enroll','pay','discount','cafe','schedule'];
 
   order.forEach(k=>{
     if (!msgState.sections.has(k)) return;
     if (msgState.type === 'study' && k === 'schedule') return;
 
-    if (k === 'enroll') parts.push(applyVars(BLOCKS.enrollBlock));
-    if (k === 'pay') parts.push(applyVars(BLOCKS.payBlock));
+    if (k === 'enroll') parts.push(applyVarsCommon(BLOCKS.enrollBlock));
+    if (k === 'pay') parts.push(applyVarsCommon(BLOCKS.payBlock));
     if (k === 'discount') parts.push(BLOCKS.discountBlock.trim() + '\n');
     if (k === 'cafe') parts.push(BLOCKS.cafeBlock.trim() + '\n');
     if (k === 'schedule') parts.push(BLOCKS.scheduleBlock.trim() + '\n');
@@ -1077,6 +1125,7 @@ document.getElementById('btnCopyMsg').addEventListener('click', async ()=>{
 document.getElementById('btnResetMsg').addEventListener('click', ()=>{
   msgState.type = 'study';
   msgState.sections = new Set(DEFAULT_SECTIONS_BY_TYPE.study);
+
   msgState.fields.month = '1';
   msgState.fields.day = '10';
   msgState.fields.time = TIME_OPTIONS.study[0];
@@ -1084,9 +1133,14 @@ document.getElementById('btnResetMsg').addEventListener('click', ()=>{
   msgState.fields.loc = LOCATIONS[STUDY_COURSES[0]][0];
   msgState.fields.amount = DEFAULT_PRICE_TEXT.study[STUDY_COURSES[0]];
 
-  msgState.fields.consultDate = '';
-  msgState.fields.consultTime = '';
-  msgState.fields.address = '';
+  // 상담톡 기본값도 리셋
+  msgState.fields.consultMonth = '1';
+  msgState.fields.consultDay = '10';
+  msgState.fields.consultWeekday = '월';
+  msgState.fields.consultAmPm = '오전';
+  msgState.fields.consultHour = '10';
+  msgState.fields.consultMin = '00';
+  msgState.fields.consultTimeOther = '';
 
   renderTypeChips();
   renderSections();
@@ -1100,9 +1154,13 @@ document.getElementById('btnDemoMsg').addEventListener('click', ()=>{
     return;
   }
   if (msgState.type === 'consult'){
-    msgState.fields.consultDate = '1월 10일(금)';
-    msgState.fields.consultTime = '오후 2시';
-    msgState.fields.address = '대구 중구 (주소 입력)';
+    msgState.fields.consultMonth = '1';
+    msgState.fields.consultDay = '10';
+    msgState.fields.consultWeekday = '월';
+    msgState.fields.consultAmPm = '오후';
+    msgState.fields.consultHour = '3';
+    msgState.fields.consultMin = '30';
+    msgState.fields.consultTimeOther = '';
     renderFields();
     renderPreview();
     return;
@@ -1122,7 +1180,6 @@ document.getElementById('btnDemoMsg').addEventListener('click', ()=>{
     msgState.fields.loc = (LOCATIONS[msgState.fields.course]||[''])[0];
     msgState.fields.amount = (DEFAULT_PRICE_TEXT[msgState.type][msgState.fields.course]||'');
   }
-
   renderFields();
   renderPreview();
 });
@@ -1413,7 +1470,8 @@ function calcPaidAmountFromSessions(){
   if (cat === 'academy'){
     const price = RF_PRICES.academy[groupKey][payType];
     if (N <= 8) return Math.round(price.p8 * (N / 8));
-    return Math.round(price.p16 * (N / 16));
+    const p16 = price.p16;
+    return Math.round(p16 * (N / 16));
   } else {
     const price = RF_PRICES.study[groupKey][payType];
     if (N <= 8) return Math.round(price.p8 * (N / 8));
@@ -1426,7 +1484,6 @@ function calcRefund(){
   const cat = rfEls.cat.value;
   const N = Number(rfEls.paidSessions.value || 0);
   const U = Number(rfEls.usedSessions.value || 0);
-
   const override = rfEls.override.checked;
 
   let paid = 0;
@@ -1445,7 +1502,7 @@ function calcRefund(){
   } else {
     const used = clamp(U, 0, N);
 
-    // ====== B안 핵심 ======
+    // B안: 아카데미 + 8회 초과
     if (cat === 'academy' && N > 8) {
       if (used === 0) {
         refund = paid;
@@ -1455,16 +1512,18 @@ function calcRefund(){
         const payType = rfEls.payType.value;
         const { p8 } = RF_PRICES.academy[gk][payType];
 
-        const firstMonthAmount = p8;
-        const remainAmount = Math.max(0, paid - firstMonthAmount);
-        const total2 = Math.max(0, N - 8);
-        const used2 = clamp(Math.max(0, used - 8), 0, total2);
+        const first8Amount = p8;                     // 첫 8회 금액
+        const remainAmount = Math.max(0, paid - first8Amount);
+
+        const total2 = Math.max(0, N - 8);           // 추가 구간 총 회차
+        const used2  = clamp(Math.max(0, used - 8), 0, total2);
 
         if (total2 === 0 || remainAmount === 0) {
           refund = 0;
           rateLabel = '추가 결제 없음';
         } else {
           if (used2 === 0) {
+            // ✅ 16회 결제 + 8회 소진이면 여기로 들어가서 remainAmount(=130,000) 환불
             refund = Math.round(remainAmount);
             rateLabel = '추가구간 사용 0회 → 전액 환불';
           } else {
@@ -1560,13 +1619,9 @@ rfEls.paidAmountInput.addEventListener('input', calcRefund);
    초기화 실행
 ========================================================= */
 initMsg();
-
-// fee init
 feeGroupOptions();
 feeProductOptions();
 feeUpdate();
-
-// refund init
 rfGroupOptions();
 calcRefund();
 </script>
