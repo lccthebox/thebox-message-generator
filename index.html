@@ -68,10 +68,10 @@
     }
     .chip input:checked + .check .tick{opacity:1}
     .form{
-      display:grid;grid-template-columns: 120px 1fr;gap:10px 12px;align-items:center;margin-top:6px;
+      display:grid;grid-template-columns: 140px 1fr;gap:10px 12px;align-items:center;margin-top:6px;
     }
     .label{font-size:13px;color:var(--muted)}
-    input[type="text"], input[type="number"], select{
+    input[type="text"], input[type="number"], input[type="date"], select{
       width:100%;padding:12px 12px;border-radius:12px;border:1px solid var(--line);
       background:#fff;outline:none;font-size:14px;
     }
@@ -290,7 +290,7 @@
     </section>
 
     <!-- =========================
-         4) 인강 환불 계산기
+         4) 인강 환불 계산기 (수정 반영)
     ========================== -->
     <section id="tab-irefund" class="panel">
       <div class="grid">
@@ -299,10 +299,16 @@
 
           <div class="form" id="irForm">
             <div class="label">실결제 금액</div>
-            <input id="irPaidAmount" type="number" min="0" value="300000" />
+            <input id="irPaidAmount" type="text" value="300,000" inputmode="numeric" />
 
-            <div class="label">결제 후 경과일</div>
-            <input id="irDaysSincePay" type="number" min="0" value="3" />
+            <div class="label">결제일자</div>
+            <input id="irPayDate" type="date" />
+
+            <div class="label">환불 요청일자</div>
+            <input id="irRefundDate" type="date" />
+
+            <div class="label">결제 후 경과일(자동)</div>
+            <input id="irDaysSincePay" type="text" readonly value="-" />
 
             <div class="label">제공 수강일수</div>
             <input id="irProvidedDays" type="number" min="1" value="30" />
@@ -313,46 +319,25 @@
               <option value="using">수강중(수강내역 있음)</option>
             </select>
 
-            <div class="label">학습수수료</div>
-            <div class="inline" style="grid-column:2/3;">
-              <label class="chip" title="학습수수료를 직접 입력합니다">
-                <input type="checkbox" id="irFeeOverride">
-                <span class="check"><span class="tick"></span></span>
-                직접입력
-              </label>
-              <label class="chip" title="차시 비율로 계산">
-                <input type="radio" name="irFeeMode" id="irModeLecture" value="lecture" checked>
-                <span class="dot"></span>
-                차시 기준
-              </label>
-              <label class="chip" title="일수 비율로 계산">
-                <input type="radio" name="irFeeMode" id="irModeDay" value="day">
-                <span class="dot"></span>
-                일수 기준
-              </label>
-            </div>
+            <div class="label">강의 선택</div>
+            <select id="irCourseSelect"></select>
 
-            <div class="label">강의 원가(기준)</div>
-            <input id="irBaseCost" type="number" min="0" value="300000" />
+            <div class="label">강의 원가(자동)</div>
+            <input id="irBaseCost" type="text" value="299,000" inputmode="numeric" readonly />
 
-            <div class="label">전체 차시</div>
-            <input id="irTotalLectures" type="number" min="0" value="40" />
+            <div class="label">전체 차시(자동)</div>
+            <input id="irTotalLectures" type="number" min="1" value="16" readonly />
 
             <div class="label">수강 차시</div>
             <input id="irUsedLectures" type="number" min="0" value="0" />
-
-            <div class="label">차감 수강일수</div>
-            <input id="irUsedDays" type="number" min="0" value="0" />
-
-            <div class="label">학습수수료(직접)</div>
-            <input id="irFeeInput" type="number" min="0" value="0" readonly />
           </div>
 
           <div class="help" style="margin-top:12px;">
             규칙 요약:
-            <br>1) 수강기간 종료(경과일 ≥ 제공일수) → 환불 불가
+            <br>1) 수강기간 종료(경과일 &gt; 제공일수) → 환불 불가
             <br>2) 전체기간 1/2 경과(경과일/제공일수 &gt; 1/2) → 환불 불가
             <br>3) 7일 이내/이후 + 미수강/수강중에 따라 위약금(실결제 10%) 및 학습수수료 공제 적용
+            <br>4) 학습수수료는 차시 기준: 강의원가 × (수강차시 / 전체차시)
           </div>
 
           <div class="btnrow">
@@ -364,7 +349,7 @@
         <div class="card previewWrap">
           <div class="previewTitle">결과</div>
           <pre id="previewIR" class="preview"></pre>
-          <div class="note">원 단위 반올림. 학습수수료는 (강의원가 × 비율) 또는 직접입력 값을 사용.</div>
+          <div class="note">원 단위 반올림. 금액 입력은 #,##0 형식(콤마)으로 표시됩니다.</div>
         </div>
       </div>
     </section>
@@ -378,6 +363,27 @@
 const moneyFmt = (n) => Number(n||0).toLocaleString('ko-KR');
 const onlyDigits = (s) => (String(s||'').replace(/[^\d]/g,''));
 const clamp = (x, a, b) => Math.min(Math.max(x, a), b);
+
+function parseMoneyText(v){
+  const n = Number(onlyDigits(v));
+  return Number.isFinite(n) ? n : 0;
+}
+function setMoneyInput(el, n){
+  el.value = moneyFmt(Number(n||0));
+}
+function bindMoneyInput(el, {allowEmpty=false} = {}){
+  el.addEventListener('focus', ()=>{
+    el.value = onlyDigits(el.value);
+    if (!el.value && !allowEmpty) el.value = '0';
+  });
+  el.addEventListener('input', ()=>{
+    el.value = onlyDigits(el.value);
+  });
+  el.addEventListener('blur', ()=>{
+    const n = parseMoneyText(el.value);
+    setMoneyInput(el, n);
+  });
+}
 
 /* =========================================================
    탭 전환
@@ -505,7 +511,7 @@ const BLOCKS = {
 `- 예약일자 : {consultDate}
 - 예약시간 : {consultTime}
 
-▪ 주소: {address}
+▪ 주소: ${THEBOX_ADDRESS_FIXED}
 시내 특성상 따로 주차장은 마련되어있지 않아, 주변 민영/공영 주차장 이용해주셔야 합니다.
 
 ※ 상담은 6층으로 바로 올라와 주시면 되셔요! (카페 봄봄 옆 입구로 오시면 엘리베이터 이용 가능하십니다.) 혹시 변동 사항 있으시면 말씀해주세요~ ☺☺
@@ -965,8 +971,7 @@ function applyVarsConsult(template){
 
   let out = template
     .replaceAll('{consultDate}', consultDate)
-    .replaceAll('{consultTime}', consultTime)
-    .replaceAll('{address}', THEBOX_ADDRESS_FIXED);
+    .replaceAll('{consultTime}', consultTime);
 
   out = out.split('\n').filter(line=>{
     if (!line.trim()) return true;
@@ -1446,97 +1451,155 @@ rfEls.override.addEventListener('change', ()=>{
 rfEls.paidAmountInput.addEventListener('input', calcRefund);
 
 /* =========================================================
-   (D) 인강 환불 계산기
+   (D) 인강 환불 계산기 (수정 반영)
 ========================================================= */
+const IR_COURSES = [
+  { key:'diana_basic_pkg', name:'Diana 바로영어 기초강좌 패키지', totalLectures:16, baseCost:299000 },
+  { key:'yuna_travel_2w', name:'Yuna 2주만에 끝내는 여행영어', totalLectures:16, baseCost:299000 },
+  { key:'james_basic_a', name:'James 진짜 영어 기초A', totalLectures:16, baseCost:299000 },
+  { key:'james_basic_b', name:'James 진짜 영어 기초B', totalLectures:16, baseCost:299000 },
+  { key:'james_basic_ab', name:'James 진짜 영어 기초A+B', totalLectures:32, baseCost:598000 },
+  { key:'cerline_verybasic_grammar', name:'Cerline 왕기초 문법 패키지', totalLectures:16, baseCost:299000 },
+  { key:'cerline_modal', name:'Cerline 핵심문법 조동사 패키지', totalLectures:14, baseCost:259000 },
+  { key:'cerline_advanced_grammar', name:'Cerline 심화 문법 패키지', totalLectures:16, baseCost:299000 },
+  { key:'cerline_modal_advanced', name:'Cerline 조동사+심화 패키지', totalLectures:30, baseCost:558000 },
+  { key:'cerline_verybasic_modal', name:'Cerline 왕기초문법+조동사 패키지', totalLectures:30, baseCost:558000 },
+  { key:'cerline_all', name:'Cerline 왕기초+조동사+심화패키지', totalLectures:46, baseCost:857000 },
+  { key:'cerline_overseas_travel', name:'Cerline 도전영어 해외여행 패키지', totalLectures:13, baseCost:209000 },
+  { key:'custom', name:'(직접입력)', totalLectures:16, baseCost:0 },
+];
+
 const irEls = {
   paid: document.getElementById('irPaidAmount'),
-  days: document.getElementById('irDaysSincePay'),
+  payDate: document.getElementById('irPayDate'),
+  refundDate: document.getElementById('irRefundDate'),
+  daysAuto: document.getElementById('irDaysSincePay'),
   providedDays: document.getElementById('irProvidedDays'),
   status: document.getElementById('irStatus'),
-  feeOverride: document.getElementById('irFeeOverride'),
-  modeLecture: document.getElementById('irModeLecture'),
-  modeDay: document.getElementById('irModeDay'),
+  courseSelect: document.getElementById('irCourseSelect'),
   baseCost: document.getElementById('irBaseCost'),
   totalLectures: document.getElementById('irTotalLectures'),
   usedLectures: document.getElementById('irUsedLectures'),
-  usedDays: document.getElementById('irUsedDays'),
-  feeInput: document.getElementById('irFeeInput'),
   preview: document.getElementById('previewIR'),
 };
 
-function irGetMode(){
-  return document.querySelector('input[name="irFeeMode"]:checked')?.value || 'lecture';
+function irSetDefaultDates(){
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const dd = String(today.getDate()).padStart(2,'0');
+  const iso = `${yyyy}-${mm}-${dd}`;
+  if (!irEls.payDate.value) irEls.payDate.value = iso;
+  if (!irEls.refundDate.value) irEls.refundDate.value = iso;
 }
 
-function irCalcLearningFee(paid, baseCost, mode, totalL, usedL, providedD, usedD, overrideOn, overrideFee){
-  if (overrideOn) return Math.max(0, Math.round(Number(overrideFee||0)));
+function irPopulateCourses(){
+  irEls.courseSelect.innerHTML = '';
+  IR_COURSES.forEach(c=>{
+    const opt = document.createElement('option');
+    opt.value = c.key;
+    opt.textContent = `${c.name} — ${c.totalLectures}강 / ${moneyFmt(c.baseCost)}원`;
+    if (c.key === 'custom') opt.textContent = `${c.name}`;
+    irEls.courseSelect.appendChild(opt);
+  });
+  irEls.courseSelect.value = IR_COURSES[0].key;
+}
 
-  const cost = Number(baseCost || 0);
-  if (cost <= 0) return 0;
+function irApplyCourse(){
+  const key = irEls.courseSelect.value;
+  const c = IR_COURSES.find(x=>x.key===key) || IR_COURSES[0];
 
-  if (mode === 'lecture'){
-    const T = Number(totalL||0);
-    const U = Number(usedL||0);
-    if (T <= 0) return 0;
-    const ratio = clamp(U, 0, T) / T;
-    return Math.max(0, Math.round(cost * ratio));
+  const isCustom = (key === 'custom');
+
+  irEls.totalLectures.readOnly = !isCustom;
+  irEls.baseCost.readOnly = !isCustom;
+
+  if (!isCustom){
+    irEls.totalLectures.value = c.totalLectures;
+    setMoneyInput(irEls.baseCost, c.baseCost);
   } else {
-    const P = Number(providedD||0);
-    const U = Number(usedD||0);
-    if (P <= 0) return 0;
-    const ratio = clamp(U, 0, P) / P;
-    return Math.max(0, Math.round(cost * ratio));
+    if (!irEls.totalLectures.value || Number(irEls.totalLectures.value) <= 0) irEls.totalLectures.value = 16;
+    setMoneyInput(irEls.baseCost, parseMoneyText(irEls.baseCost.value));
   }
+}
+
+function irCalcElapsedDaysInclusive(){
+  const pay = irEls.payDate.value;
+  const req = irEls.refundDate.value;
+  if (!pay || !req) return {ok:false, days:null, reason:'결제일자/환불요청일자를 입력해주세요.'};
+
+  const payD = new Date(pay + 'T00:00:00');
+  const reqD = new Date(req + 'T00:00:00');
+  const msDay = 24*60*60*1000;
+
+  if (Number.isNaN(payD.getTime()) || Number.isNaN(reqD.getTime())) {
+    return {ok:false, days:null, reason:'날짜 형식이 올바르지 않습니다.'};
+  }
+  const diff = Math.floor((reqD - payD) / msDay);
+  if (diff < 0) return {ok:false, days:null, reason:'환불요청일자가 결제일자보다 빠릅니다.'};
+
+  // 결제일 포함(동일 날짜 = 1일)
+  return {ok:true, days: diff + 1, reason:''};
 }
 
 function irUpdate(){
-  const paid = Math.max(0, Number(irEls.paid.value || 0));
-  const daysSince = Math.max(0, Number(irEls.days.value || 0));
+  const paid = Math.max(0, parseMoneyText(irEls.paid.value));
+  setMoneyInput(irEls.paid, paid);
+
+  const elapsed = irCalcElapsedDaysInclusive();
   const provided = Math.max(0, Number(irEls.providedDays.value || 0));
-
   const status = irEls.status.value; // none | using
-  const overrideOn = irEls.feeOverride.checked;
-  const mode = irGetMode();
 
-  // 직접입력 enable/disable
-  irEls.feeInput.readOnly = !overrideOn;
+  let daysSince = null;
+  if (elapsed.ok){
+    daysSince = elapsed.days;
+    irEls.daysAuto.value = `${daysSince}일`;
+  } else {
+    irEls.daysAuto.value = '-';
+  }
 
-  const baseCost = Math.max(0, Number(irEls.baseCost.value || 0));
-  const totalL = Math.max(0, Number(irEls.totalLectures.value || 0));
-  const usedL  = Math.max(0, Number(irEls.usedLectures.value || 0));
-  const usedD  = Math.max(0, Number(irEls.usedDays.value || 0));
-  const overrideFee = Math.max(0, Number(irEls.feeInput.value || 0));
+  const baseCost = Math.max(0, parseMoneyText(irEls.baseCost.value));
+  if (!irEls.baseCost.readOnly) setMoneyInput(irEls.baseCost, baseCost);
 
-  const penalty = Math.round(paid * 0.10); // 위약금: 실결제의 10%
+  const totalL = Math.max(1, Number(irEls.totalLectures.value || 1));
+  const usedLraw = Math.max(0, Number(irEls.usedLectures.value || 0));
+  const usedL = clamp(usedLraw, 0, totalL);
 
+  // 학습수수료(차시 기준 고정)
+  const learningFee = Math.round(baseCost * (usedL / totalL));
+
+  // 위약금(실결제 10%)
+  const penalty = Math.round(paid * 0.10);
+
+  // 환불불가 체크
   let eligible = true;
   let blockReason = '';
 
-  if (provided <= 0){
+  if (!elapsed.ok){
     eligible = false;
-    blockReason = '제공 수강일수 입력 필요';
-  } else if (daysSince >= provided){
+    blockReason = elapsed.reason;
+  } else if (provided <= 0){
     eligible = false;
-    blockReason = '수강기간 종료(환불 불가)';
-  } else if ((daysSince / provided) > 0.5){
-    eligible = false;
-    blockReason = '전체기간 1/2 경과(환불 불가)';
+    blockReason = '제공 수강일수를 입력해주세요.';
+  } else {
+    // 6) 경과일이 제공 수강일수를 초과하면(수강기간 종료) 환불 0
+    if (daysSince > provided){
+      eligible = false;
+      blockReason = '수강기간 종료(환불 불가)';
+    } else if ((daysSince / provided) > 0.5){
+      eligible = false;
+      blockReason = '전체기간 1/2 경과(환불 불가)';
+    }
   }
 
-  // 학습수수료(수강중일 때만 의미있지만, 출력용으로 계산)
-  const learningFee = irCalcLearningFee(
-    paid, baseCost, mode, totalL, usedL, provided, usedD, overrideOn, overrideFee
-  );
-
-  // 7일 기준
-  const within7 = (daysSince <= 7);
+  const within7 = (elapsed.ok && daysSince <= 7);
 
   let refund = 0;
   let ruleLabel = '';
 
   if (!eligible){
     refund = 0;
-    ruleLabel = blockReason;
+    ruleLabel = blockReason || '환불 불가';
   } else {
     if (status === 'none'){
       // 미수강
@@ -1564,11 +1627,16 @@ function irUpdate(){
   const lines = [];
   lines.push('[인강 환불 계산 결과]');
   lines.push(`- 실결제 금액: ${moneyFmt(paid)}원`);
-  lines.push(`- 결제 후 경과일: ${daysSince}일`);
+  lines.push(`- 결제일자: ${irEls.payDate.value || '-'}`);
+  lines.push(`- 환불 요청일자: ${irEls.refundDate.value || '-'}`);
+  lines.push(`- 결제 후 경과일(자동): ${elapsed.ok ? (daysSince + '일') : '-'}`);
   lines.push(`- 제공 수강일수: ${provided}일`);
   lines.push(`- 수강 상태: ${status === 'none' ? '미수강' : '수강중'}`);
+  lines.push(`- 강의원가: ${moneyFmt(baseCost)}원`);
+  lines.push(`- 전체 차시: ${totalL}강`);
+  lines.push(`- 수강 차시: ${usedL}강`);
+  lines.push(`- 학습수수료(차시기준): ${moneyFmt(learningFee)}원`);
   lines.push(`- 위약금(10%): ${moneyFmt(penalty)}원`);
-  lines.push(`- 학습수수료: ${moneyFmt(learningFee)}원${overrideOn ? ' (직접입력/직접값 우선)' : (mode === 'lecture' ? ' (차시 기준)' : ' (일수 기준)')}`);
   lines.push(`- 적용 규칙: ${ruleLabel}`);
   lines.push('--------------------');
   lines.push(`최종 환불금액: ${moneyFmt(refund)}원`);
@@ -1582,32 +1650,24 @@ document.getElementById('btnCopyIR').addEventListener('click', async ()=>{
 });
 
 document.getElementById('btnResetIR').addEventListener('click', ()=>{
-  irEls.paid.value = 300000;
-  irEls.days.value = 3;
+  setMoneyInput(irEls.paid, 300000);
+
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const dd = String(today.getDate()).padStart(2,'0');
+  const iso = `${yyyy}-${mm}-${dd}`;
+  irEls.payDate.value = iso;
+  irEls.refundDate.value = iso;
+
   irEls.providedDays.value = 30;
   irEls.status.value = 'none';
 
-  irEls.feeOverride.checked = false;
-  irEls.modeLecture.checked = true;
+  irEls.courseSelect.value = IR_COURSES[0].key;
+  irApplyCourse();
 
-  irEls.baseCost.value = 300000;
-  irEls.totalLectures.value = 40;
   irEls.usedLectures.value = 0;
-  irEls.usedDays.value = 0;
-
-  irEls.feeInput.value = 0;
-  irEls.feeInput.readOnly = true;
-
   irUpdate();
-});
-
-[
-  irEls.paid, irEls.days, irEls.providedDays, irEls.status,
-  irEls.feeOverride, irEls.modeLecture, irEls.modeDay,
-  irEls.baseCost, irEls.totalLectures, irEls.usedLectures, irEls.usedDays, irEls.feeInput
-].forEach(el=>{
-  el.addEventListener('input', irUpdate);
-  el.addEventListener('change', irUpdate);
 });
 
 /* =========================================================
@@ -1625,6 +1685,26 @@ rfGroupOptions();
 calcRefund();
 
 // irefund init
+irPopulateCourses();
+irSetDefaultDates();
+irApplyCourse();
+bindMoneyInput(irEls.paid);
+bindMoneyInput(irEls.baseCost, {allowEmpty:true});
+
+[
+  irEls.payDate, irEls.refundDate, irEls.providedDays, irEls.status,
+  irEls.courseSelect, irEls.baseCost, irEls.totalLectures, irEls.usedLectures, irEls.paid
+].forEach(el=>{
+  el.addEventListener('input', ()=>{
+    if (el === irEls.courseSelect) irApplyCourse();
+    irUpdate();
+  });
+  el.addEventListener('change', ()=>{
+    if (el === irEls.courseSelect) irApplyCourse();
+    irUpdate();
+  });
+});
+
 irUpdate();
 </script>
 </body>
