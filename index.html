@@ -352,7 +352,7 @@
             <br>- 1/3 초과 ~ 1/2 이하 : 결제금액 × 1/2
             <br>- 1/2 초과 : 0원
             <br><br>
-            B안(아카데미 + 8회 초과 결제): 사용 시작 후에는 <b>첫 8회 금액은 제외</b>하고, (결제금액 - 8회금액)만 위 구간을 적용합니다.
+            B안(아카데미 + 8회 초과 결제): 사용 시작 후에는 첫 8회 금액은 제외하고, (결제금액 - 8회금액)만 위 구간을 적용합니다.
           </div>
 
           <div class="btnrow">
@@ -458,9 +458,7 @@ const LOCATIONS = {
 };
 
 const TIME_OPTIONS = {
-  // 스터디는 11시/20시
   study: ['오전 11시','오후 8시','오후 1시'],
-  // 아카데미 기본 + 일부 추가(예시)
   academyCommon: [
     '오전 9시 30분','오전 10시 30분','오전 11시','오후 12시',
     '오후 6시 50분','오후 8시 30분'
@@ -494,13 +492,13 @@ const DEFAULT_PRICE_TEXT = {
     '코트니 Go-to영어': '8회(1개월) 18.5만원, 16회(2개월) 33만원',
   },
   study: {
-    '원어민 회화스터디': '16회 277,000원, 32회 494,000원'
+    '원어민 회화스터디': '8회 15만원, 16회 277,000원, 32회 494,000원'
   }
 };
 
 const DEFAULT_SECTIONS_BY_TYPE = {
   audit: ['enroll'],
-  consult: ['enroll'],
+  consult: [], // ✅ 상담톡은 섹션 선택 없이 고정 출력
   study: ['enroll','pay','discount','cafe'], // ✅ 스터디에서 schedule 섹션 삭제
   academy: ['enroll','pay','discount','schedule'],
   academyResit: ['enroll','pay','discount','schedule'],
@@ -551,6 +549,20 @@ https://thebox.imweb.me/academyschedule
 
 다녀가 주셔서 감사합니다! 혹시 변동 및 추가 문의 사항 있으시면 편하게 말씀해주세요 :)
 `,
+
+  // ✅ 상담톡(고정 템플릿 + 입력값 치환)
+  consultHeader: `안녕하세요. 더박스입니다. 😊
+예약하신 상담 내역 한번 더 안내드릴께요!
+`,
+  consultBlock: `- 예약일자 : {consultDate}
+- 예약시간 : {consultTime}
+
+▪ 주소: {address}
+시내 특성상 따로 주차장은 마련되어있지 않아, 주변 민영/공영 주차장 이용해주셔야 합니다.
+
+※ 상담은 6층으로 바로 올라와 주시면 되셔요! (카페 봄봄 옆 입구로 오시면 엘리베이터 이용 가능하십니다.) 혹시 변동 사항 있으시면 말씀해주세요~ ☺☺
+`,
+
   // 수강증(고정)
   certFixed: `안녕하세요 😊
 수강증 발급을 위해 아래 항목들 작성 부탁드릴게요!
@@ -589,7 +601,12 @@ const msgState = {
     time: TIME_OPTIONS.study[0],
     course: STUDY_COURSES[0],
     loc: LOCATIONS[STUDY_COURSES[0]][0],
-    amount: DEFAULT_PRICE_TEXT.study[STUDY_COURSES[0]]
+    amount: DEFAULT_PRICE_TEXT.study[STUDY_COURSES[0]],
+
+    // ✅ 상담톡 필드
+    consultDate: '',
+    consultTime: '',
+    address: ''
   }
 };
 
@@ -631,6 +648,12 @@ function renderTypeChips(){
         msgState.fields.loc = (LOCATIONS[first]||[''])[0];
         msgState.fields.amount = (DEFAULT_PRICE_TEXT[msgState.type][first] || '');
       }
+      if (msgState.type === 'consult'){
+        msgState.fields.consultDate = msgState.fields.consultDate || '';
+        msgState.fields.consultTime = msgState.fields.consultTime || '';
+        msgState.fields.address = msgState.fields.address || '';
+      }
+
       renderSections();
       renderFields();
       renderPreview();
@@ -642,9 +665,21 @@ function renderTypeChips(){
 function renderSections(){
   sectionChips.innerHTML = '';
 
+  // ✅ 상담톡: 섹션 선택 없이 고정
+  if (msgState.type === 'consult'){
+    const lab = document.createElement('label');
+    lab.className = 'chip';
+    lab.innerHTML = `
+      <input type="checkbox" checked disabled>
+      <span class="check"><span class="tick"></span></span>
+      <span>상담톡 안내</span>
+    `;
+    sectionChips.appendChild(lab);
+    return;
+  }
+
   // 수강증/원어민문의는 섹션 선택 없이 고정
   if (msgState.type === 'cert' || msgState.type === 'nativeInquiry'){
-    const key = (msgState.type === 'cert') ? 'certFixed' : 'nativeInquiryFixed';
     const lab = document.createElement('label');
     lab.className = 'chip';
     lab.innerHTML = `
@@ -684,11 +719,8 @@ function renderSections(){
   }
 
   MSG_SECTIONS.forEach(s=>{
-    // ✅ 요구사항 1) 스터디에서 선생님 스케쥴 안내 섹션 자체 삭제(숨김)
+    // ✅ 스터디에서 schedule 섹션 자체 삭제(숨김)
     if (msgState.type === 'study' && s.key === 'schedule') return;
-
-    // ✅ 아카데미/재수강에서 네이버카페 안내는 기본적으로 필요 없을 때가 있었지만
-    // 여기서는 "섹션 표시 자체"는 유지(사용자가 체크 가능). 다만 기본 체크는 위에서 제어.
 
     const checked = msgState.sections.has(s.key);
     const lab = document.createElement('label');
@@ -708,35 +740,41 @@ function renderSections(){
   });
 }
 
-// fieldVisible(): trim 비교 버전
-function fieldVisible(fieldKey){
-  const t = String(msgState.type||'').trim();
-
-  // 고정 타입들
-  if (t === 'cert' || t === 'nativeInquiry') return false;
-
-  // 스터디 크레딧: 별도 필드
-  if (t === 'credit'){
-    return ['creditRemainCount','creditExpireMonth','creditExpireDay','creditExtendPlan','creditExtendOther'].includes(fieldKey);
-  }
-
-  // 기본: 수강/결제 관련 필드
-  const needsCommon = (msgState.sections.has('enroll') || msgState.sections.has('pay') || msgState.sections.has('discount') || msgState.sections.has('cafe') || msgState.sections.has('schedule'));
-  if (!needsCommon) return false;
-
-  // 스터디/아카데미 공통
-  if (['month','day','time','course','loc'].includes(fieldKey)) return true;
-
-  // 금액: 결제 정보 있을 때만 (그리고 스터디/아카데미/재수강만)
-  if (fieldKey === 'amount'){
-    return msgState.sections.has('pay') && (t === 'study' || t === 'academy' || t === 'academyResit');
-  }
-
-  return false;
-}
-
 function renderFields(){
   fieldsWrap.innerHTML = '';
+
+  // ✅ 상담톡: 전용 입력 3개
+  if (msgState.type === 'consult'){
+    const rows = [];
+
+    const d = document.createElement('input');
+    d.type = 'text';
+    d.placeholder = '예: 1월 10일(금)';
+    d.value = msgState.fields.consultDate || '';
+    d.addEventListener('input', ()=>{ msgState.fields.consultDate = d.value; renderPreview(); });
+    rows.push({label:'예약일자', el:d});
+
+    const t = document.createElement('input');
+    t.type = 'text';
+    t.placeholder = '예: 오후 2시';
+    t.value = msgState.fields.consultTime || '';
+    t.addEventListener('input', ()=>{ msgState.fields.consultTime = t.value; renderPreview(); });
+    rows.push({label:'예약시간', el:t});
+
+    const a = document.createElement('input');
+    a.type = 'text';
+    a.placeholder = '예: (주소 입력)';
+    a.value = msgState.fields.address || '';
+    a.addEventListener('input', ()=>{ msgState.fields.address = a.value; renderPreview(); });
+    rows.push({label:'주소', el:a});
+
+    rows.forEach(r=>{
+      const l = document.createElement('div'); l.className='label'; l.textContent=r.label;
+      const w = document.createElement('div'); w.appendChild(r.el);
+      fieldsWrap.appendChild(l); fieldsWrap.appendChild(w);
+    });
+    return;
+  }
 
   // 수강증/원어민문의: 입력칸 없음
   if (msgState.type === 'cert' || msgState.type === 'nativeInquiry'){
@@ -746,7 +784,7 @@ function renderFields(){
 
   // 스터디 크레딧: 전용 필드
   if (msgState.type === 'credit'){
-    const add = (label, key, node)=>{
+    const add = (label, node)=>{
       const l = document.createElement('div'); l.className='label'; l.textContent=label;
       const w = document.createElement('div'); w.appendChild(node);
       fieldsWrap.appendChild(l); fieldsWrap.appendChild(w);
@@ -757,146 +795,129 @@ function renderFields(){
       return;
     }
 
-    // 크레딧 안내(회/만료일)
     if (msgState.sections.has('creditInfo')){
-      add('남은 크레딧(회)', 'creditRemainCount', (()=>{ const i=document.createElement('input'); i.type='number'; i.min='0'; i.value=msgState.fields.creditRemainCount||''; i.addEventListener('input',()=>{msgState.fields.creditRemainCount=i.value;renderPreview();}); return i; })());
-      add('만료 월', 'creditExpireMonth', (()=>{ const i=document.createElement('input'); i.type='number'; i.min='1'; i.value=msgState.fields.creditExpireMonth||''; i.addEventListener('input',()=>{msgState.fields.creditExpireMonth=i.value;renderPreview();}); return i; })());
-      add('만료 일', 'creditExpireDay', (()=>{ const i=document.createElement('input'); i.type='number'; i.min='1'; i.value=msgState.fields.creditExpireDay||''; i.addEventListener('input',()=>{msgState.fields.creditExpireDay=i.value;renderPreview();}); return i; })());
+      const i1=document.createElement('input'); i1.type='number'; i1.min='0'; i1.value=msgState.fields.creditRemainCount||''; i1.addEventListener('input',()=>{msgState.fields.creditRemainCount=i1.value;renderPreview();});
+      add('남은 크레딧(회)', i1);
+
+      const i2=document.createElement('input'); i2.type='number'; i2.min='1'; i2.value=msgState.fields.creditExpireMonth||''; i2.addEventListener('input',()=>{msgState.fields.creditExpireMonth=i2.value;renderPreview();});
+      add('만료 월', i2);
+
+      const i3=document.createElement('input'); i3.type='number'; i3.min='1'; i3.value=msgState.fields.creditExpireDay||''; i3.addEventListener('input',()=>{msgState.fields.creditExpireDay=i3.value;renderPreview();});
+      add('만료 일', i3);
     }
 
-    // 연장안내(16회/32회/기타)
     if (msgState.sections.has('creditExtend')){
-      add('연장 옵션', 'creditExtendPlan', (()=> {
-        const s=document.createElement('select');
-        s.innerHTML = `
-          <option value="16">16회 : 277,000원</option>
-          <option value="32">32회 : 494,000원</option>
-          <option value="other">기타(직접입력)</option>
-        `;
-        s.value = msgState.fields.creditExtendPlan || '16';
-        s.addEventListener('change', ()=>{
-          msgState.fields.creditExtendPlan = s.value;
-          renderFields();
-          renderPreview();
-        });
-        return s;
-      })());
+      const s=document.createElement('select');
+      s.innerHTML = `
+        <option value="16">16회 : 277,000원</option>
+        <option value="32">32회 : 494,000원</option>
+        <option value="other">기타(직접입력)</option>
+      `;
+      s.value = msgState.fields.creditExtendPlan || '16';
+      s.addEventListener('change', ()=>{
+        msgState.fields.creditExtendPlan = s.value;
+        renderFields();
+        renderPreview();
+      });
+      add('연장 옵션', s);
 
       const plan = msgState.fields.creditExtendPlan || '16';
       if (plan === 'other'){
-        add('기타 금액(직접입력)', 'creditExtendOther', (()=>{ const i=document.createElement('input'); i.type='text'; i.value=msgState.fields.creditExtendOther||''; i.placeholder='예: 20회 350,000원'; i.addEventListener('input',()=>{msgState.fields.creditExtendOther=i.value;renderPreview();}); return i; })());
+        const i=document.createElement('input');
+        i.type='text';
+        i.value=msgState.fields.creditExtendOther||'';
+        i.placeholder='예: 20회 350,000원';
+        i.addEventListener('input',()=>{msgState.fields.creditExtendOther=i.value;renderPreview();});
+        add('기타 금액(직접입력)', i);
       }
     }
-
     return;
   }
 
   // 공통 필드 렌더
-  const rows = [];
+  const needsCommon = (msgState.sections.has('enroll') || msgState.sections.has('pay') || msgState.sections.has('discount') || msgState.sections.has('cafe') || msgState.sections.has('schedule'));
+  if (!needsCommon){
+    fieldsWrap.innerHTML = `<div class="label" style="grid-column:1/3;color:var(--muted);">선택된 섹션에 입력할 항목이 없습니다.</div>`;
+    return;
+  }
 
+  const rows = [];
   const addRow = (label, el) => rows.push({label, el});
 
-  if (fieldVisible('month')){
-    const i = document.createElement('input'); i.type='number'; i.min='1'; i.value=msgState.fields.month||'';
-    i.addEventListener('input', ()=>{msgState.fields.month=i.value; renderPreview();});
-    addRow('시작 월', i);
-  }
-  if (fieldVisible('day')){
-    const i = document.createElement('input'); i.type='number'; i.min='1'; i.value=msgState.fields.day||'';
-    i.addEventListener('input', ()=>{msgState.fields.day=i.value; renderPreview();});
-    addRow('시작 일', i);
-  }
+  const monthI = document.createElement('input'); monthI.type='number'; monthI.min='1'; monthI.value=msgState.fields.month||''; monthI.addEventListener('input', ()=>{msgState.fields.month=monthI.value; renderPreview();});
+  addRow('시작 월', monthI);
 
-  if (fieldVisible('time')){
-    const s = document.createElement('select');
+  const dayI = document.createElement('input'); dayI.type='number'; dayI.min='1'; dayI.value=msgState.fields.day||''; dayI.addEventListener('input', ()=>{msgState.fields.day=dayI.value; renderPreview();});
+  addRow('시작 일', dayI);
 
-    let opts = [];
-    if (msgState.type === 'study') opts = TIME_OPTIONS.study;
-    else if (msgState.type === 'academy' || msgState.type === 'academyResit') opts = TIME_OPTIONS.academyCommon;
-    else opts = TIME_OPTIONS.academyCommon;
+  const timeS = document.createElement('select');
+  let opts = [];
+  if (msgState.type === 'study') opts = TIME_OPTIONS.study;
+  else if (msgState.type === 'academy' || msgState.type === 'academyResit') opts = TIME_OPTIONS.academyCommon;
+  else opts = TIME_OPTIONS.academyCommon;
+  timeS.innerHTML = opts.map(v=>`<option value="${v}">${v}</option>`).join('');
+  timeS.value = msgState.fields.time || opts[0];
+  timeS.addEventListener('change', ()=>{
+    msgState.fields.time = timeS.value;
+    renderPreview();
+    renderFields();
+  });
+  addRow('시간', timeS);
 
-    s.innerHTML = opts.map(v=>`<option value="${v}">${v}</option>`).join('');
-    s.value = msgState.fields.time || opts[0];
-    s.addEventListener('change', ()=>{
-      msgState.fields.time = s.value;
-      renderPreview();
-      // ✅ 요청: renderFields()에서 select change 시 renderFields() 호출 추가
-      renderFields();
-    });
-    addRow('시간', s);
-  }
+  const courseS = document.createElement('select');
+  let list = [];
+  if (msgState.type === 'study') list = STUDY_COURSES;
+  else if (msgState.type === 'academy' || msgState.type === 'academyResit') list = ACADEMY_COURSES;
+  else list = ACADEMY_COURSES;
+  courseS.innerHTML = list.map(v=>`<option value="${v}">${v}</option>`).join('');
+  courseS.value = msgState.fields.course || list[0];
+  courseS.addEventListener('change', ()=>{
+    msgState.fields.course = courseS.value;
+    const locList = LOCATIONS[courseS.value] || [''];
+    msgState.fields.loc = locList[0];
 
-  if (fieldVisible('course')){
-    const s = document.createElement('select');
+    if (msgState.type === 'academy' || msgState.type === 'academyResit'){
+      msgState.fields.amount = (DEFAULT_PRICE_TEXT[msgState.type][courseS.value] || '');
+    }
+    if (msgState.type === 'study'){
+      msgState.fields.amount = (DEFAULT_PRICE_TEXT.study[courseS.value] || '');
+    }
 
-    let list = [];
-    if (msgState.type === 'study') list = STUDY_COURSES;
-    else if (msgState.type === 'academy' || msgState.type === 'academyResit') list = ACADEMY_COURSES;
-    else list = ACADEMY_COURSES;
+    renderFields();
+    renderPreview();
+  });
+  addRow('수강명', courseS);
 
-    s.innerHTML = list.map(v=>`<option value="${v}">${v}</option>`).join('');
-    s.value = msgState.fields.course || list[0];
+  const locS = document.createElement('select');
+  const locList = LOCATIONS[msgState.fields.course] || [''];
+  locS.innerHTML = locList.map(v=>`<option value="${v}">${v}</option>`).join('');
+  locS.value = msgState.fields.loc || locList[0];
+  locS.addEventListener('change', ()=>{
+    msgState.fields.loc = locS.value;
+    renderPreview();
+    renderFields();
+  });
+  addRow('위치', locS);
 
-    s.addEventListener('change', ()=>{
-      msgState.fields.course = s.value;
-
-      // 위치 업데이트
-      const locList = LOCATIONS[s.value] || [''];
-      msgState.fields.loc = locList[0];
-
-      // 금액 디폴트 텍스트 업데이트(요구사항 3/4/5)
-      if (msgState.type === 'academy' || msgState.type === 'academyResit'){
-        msgState.fields.amount = (DEFAULT_PRICE_TEXT[msgState.type][s.value] || '');
-      }
-      if (msgState.type === 'study'){
-        msgState.fields.amount = (DEFAULT_PRICE_TEXT.study[s.value] || '');
-      }
-
-      renderFields();
-      renderPreview();
-    });
-    addRow('수강명', s);
-  }
-
-  if (fieldVisible('loc')){
-    const s = document.createElement('select');
-    const course = msgState.fields.course;
-    const locList = LOCATIONS[course] || [''];
-    s.innerHTML = locList.map(v=>`<option value="${v}">${v}</option>`).join('');
-    s.value = msgState.fields.loc || locList[0];
-    s.addEventListener('change', ()=>{
-      msgState.fields.loc = s.value;
-      renderPreview();
-      renderFields(); // select change -> renderFields()
-    });
-    addRow('위치', s);
-  }
-
-  if (fieldVisible('amount')){
-    const i = document.createElement('input');
-    i.type='text';
-    i.value = msgState.fields.amount || '';
-    i.placeholder = '예: 8회(1개월) 17만원, 16회(2개월) 30만원 / 280,000';
-    i.addEventListener('input', ()=>{
-      msgState.fields.amount = i.value;
+  if (msgState.sections.has('pay') && (msgState.type === 'study' || msgState.type === 'academy' || msgState.type === 'academyResit')){
+    const amt = document.createElement('input');
+    amt.type='text';
+    amt.value = msgState.fields.amount || '';
+    amt.placeholder = '예: 8회(1개월) 17만원, 16회(2개월) 30만원 / 280,000';
+    amt.addEventListener('input', ()=>{
+      msgState.fields.amount = amt.value;
       renderPreview();
     });
-    i.addEventListener('blur', ()=>{
-      // 숫자만 있는 경우 콤마 포맷
-      const raw = String(i.value||'').trim();
+    amt.addEventListener('blur', ()=>{
+      const raw = String(amt.value||'').trim();
       if (raw && /^[\d,]+$/.test(raw)){
         const num = Number(onlyDigits(raw));
-        i.value = moneyFmt(num);
-        msgState.fields.amount = i.value;
+        amt.value = moneyFmt(num);
+        msgState.fields.amount = amt.value;
         renderPreview();
       }
     });
-    addRow('금액', i);
-  }
-
-  if (rows.length === 0){
-    fieldsWrap.innerHTML = `<div class="label" style="grid-column:1/3;color:var(--muted);">선택된 섹션에 입력할 항목이 없습니다.</div>`;
-    return;
+    addRow('금액', amt);
   }
 
   rows.forEach(r=>{
@@ -914,6 +935,10 @@ function applyVars(template){
   const loc = String(msgState.fields.loc||'').trim();
   const amount = String(msgState.fields.amount||'').trim();
 
+  const consultDate = String(msgState.fields.consultDate||'').trim();
+  const consultTime = String(msgState.fields.consultTime||'').trim();
+  const address = String(msgState.fields.address||'').trim();
+
   const date = (month && day) ? `${month}월 ${day}일` : '';
 
   let out = template
@@ -921,27 +946,31 @@ function applyVars(template){
     .replaceAll('{time}', time)
     .replaceAll('{course}', course)
     .replaceAll('{loc}', loc)
-    .replaceAll('{amount}', amount);
+    .replaceAll('{amount}', amount)
+    .replaceAll('{consultDate}', consultDate)
+    .replaceAll('{consultTime}', consultTime)
+    .replaceAll('{address}', address);
 
   // 빈값 있는 줄 제거(치환 후)
   out = out.split('\n').filter(line=>{
     const t = line.trim();
     if (!t) return true;
-    if (t.includes(':') && t.endsWith(':')) return false;
-    if (t.includes(':') && /:\s*$/.test(t)) return false;
-    if (t.includes('{') || t.includes('}')) return false;
-    if (t.endsWith(':') && t.length <= 10) return false;
-    // "- 금액 : " 같이 값이 공백이면 제거
     if (/:\s*$/.test(line)) return false;
     return true;
   }).join('\n');
 
-  // 연속 공백 정리
   out = out.replace(/\n{3,}/g, '\n\n');
   return out.trim() + '\n';
 }
 
 function renderPreview(){
+  // ✅ 상담톡 고정 출력
+  if (msgState.type === 'consult'){
+    const txt = (BLOCKS.consultHeader + '\n' + applyVars(BLOCKS.consultBlock)).replace(/\n{3,}/g,'\n\n').trim() + '\n';
+    previewMsg.textContent = txt;
+    return;
+  }
+
   // 고정 타입
   if (msgState.type === 'cert'){
     previewMsg.textContent = BLOCKS.certFixed;
@@ -1016,8 +1045,6 @@ function renderPreview(){
 
   order.forEach(k=>{
     if (!msgState.sections.has(k)) return;
-
-    // ✅ 요구사항 1) 스터디에서 스케쥴안내 섹션 삭제(출력도 차단)
     if (msgState.type === 'study' && k === 'schedule') return;
 
     if (k === 'enroll') parts.push(applyVars(BLOCKS.enrollBlock));
@@ -1028,9 +1055,6 @@ function renderPreview(){
   });
 
   parts.push(BLOCKS.footer);
-
-  // ✅ 요구사항 6) 금액 관련 bold(**) 사용 안 함: 이미 템플릿에 ** 없음
-
   previewMsg.textContent = parts.join('\n').replace(/\n{3,}/g,'\n\n').trim() + '\n';
 }
 
@@ -1060,6 +1084,10 @@ document.getElementById('btnResetMsg').addEventListener('click', ()=>{
   msgState.fields.loc = LOCATIONS[STUDY_COURSES[0]][0];
   msgState.fields.amount = DEFAULT_PRICE_TEXT.study[STUDY_COURSES[0]];
 
+  msgState.fields.consultDate = '';
+  msgState.fields.consultTime = '';
+  msgState.fields.address = '';
+
   renderTypeChips();
   renderSections();
   renderFields();
@@ -1068,12 +1096,21 @@ document.getElementById('btnResetMsg').addEventListener('click', ()=>{
 
 document.getElementById('btnDemoMsg').addEventListener('click', ()=>{
   if (msgState.type === 'cert'){
-    // 수강증은 고정 출력이므로 데모 불필요
     alert('수강증 발급은 고정 문구입니다.');
     return;
   }
+  if (msgState.type === 'consult'){
+    msgState.fields.consultDate = '1월 10일(금)';
+    msgState.fields.consultTime = '오후 2시';
+    msgState.fields.address = '대구 중구 (주소 입력)';
+    renderFields();
+    renderPreview();
+    return;
+  }
+
   msgState.fields.month = '1';
   msgState.fields.day = '10';
+
   if (msgState.type === 'study'){
     msgState.fields.time = TIME_OPTIONS.study[0];
     msgState.fields.course = STUDY_COURSES[0];
@@ -1085,6 +1122,7 @@ document.getElementById('btnDemoMsg').addEventListener('click', ()=>{
     msgState.fields.loc = (LOCATIONS[msgState.fields.course]||[''])[0];
     msgState.fields.amount = (DEFAULT_PRICE_TEXT[msgState.type][msgState.fields.course]||'');
   }
+
   renderFields();
   renderPreview();
 });
@@ -1094,7 +1132,6 @@ document.getElementById('btnDemoMsg').addEventListener('click', ()=>{
 ========================================================= */
 const FEE_TABLE = {
   academy: {
-    // 그룹: 설린/유나/라일리/제인/티나/다이애나
     groupA: {
       label: '설린 / 유나 / 라일리 / 제인 / 티나 / 다이애나',
       new: [
@@ -1106,7 +1143,6 @@ const FEE_TABLE = {
         { key:'m2', label:'2개월 (290,000 / 기준 16)', baseSessions:16, baseAmount:290000 },
       ],
     },
-    // 제임스
     james: {
       label: '제임스 진짜영어',
       new: [
@@ -1118,7 +1154,6 @@ const FEE_TABLE = {
         { key:'w4', label:'주4회 (310,000 / 기준 16)', baseSessions:16, baseAmount:310000 },
       ],
     },
-    // 크리스
     chris: {
       label: '크리스 미디어영어',
       new: [
@@ -1130,7 +1165,6 @@ const FEE_TABLE = {
         { key:'w4', label:'주4회 (300,000 / 기준 16)', baseSessions:16, baseAmount:300000 },
       ],
     },
-    // 코트니
     courtney: {
       label: '코트니 Go-to영어',
       new: [
@@ -1142,7 +1176,6 @@ const FEE_TABLE = {
         { key:'m2', label:'2개월(2과목) (330,000 / 기준 16)', baseSessions:16, baseAmount:330000 },
       ],
     },
-    // 티나 오픽(추가)
     tinaOpic: {
       label: '티나 오픽',
       new: [
@@ -1152,7 +1185,6 @@ const FEE_TABLE = {
         { key:'opic', label:'오픽 (210,000 / 총 8회)', baseSessions:8, baseAmount:210000 },
       ],
     },
-    // 짜이뤼 중국어(추가)
     zhaili: {
       label: '짜이뤼 중국어',
       new: [
@@ -1235,7 +1267,6 @@ function feeUpdate(){
   feeEls.baseSessions.value = p.baseSessions;
   feeEls.baseAmount.value = moneyFmt(p.baseAmount);
 
-  // 할인 입력칸
   feeEls.discOtherAmount.readOnly = !feeEls.discOtherOn.checked;
 
   const inS = Number(feeEls.inputSessions.value || 0);
@@ -1320,7 +1351,7 @@ document.getElementById('btnResetFee').addEventListener('click', ()=>{
 const RF_PRICES = {
   academy: {
     groupA: {
-      label: '설린 / 유나 / 라일리 / 제인 / 티나',
+      label: '설린 / 유나 / 라일리 / 제인 / 티나 / 다이애나',
       new: { p8:170000, p16:300000 },
       resit: { p8:165000, p16:290000 }
     },
@@ -1381,13 +1412,11 @@ function calcPaidAmountFromSessions(){
 
   if (cat === 'academy'){
     const price = RF_PRICES.academy[groupKey][payType];
-    if (N <= 8) return price.p8;
-    // 8 초과는 16회 기준으로 비례 계산
-    const p16 = price.p16;
-    return Math.round(p16 * (N / 16));
+    if (N <= 8) return Math.round(price.p8 * (N / 8));
+    return Math.round(price.p16 * (N / 16));
   } else {
     const price = RF_PRICES.study[groupKey][payType];
-    if (N <= 8) return price.p8;
+    if (N <= 8) return Math.round(price.p8 * (N / 8));
     if (N <= 16) return Math.round(price.p16 * (N / 16));
     return Math.round(price.p32 * (N / 32));
   }
@@ -1474,7 +1503,6 @@ function calcRefund(){
     }
   }
 
-  // 자동금액 표시
   const autoPaid = calcPaidAmountFromSessions();
   rfEls.paidAmount.value = moneyFmt(autoPaid);
 
