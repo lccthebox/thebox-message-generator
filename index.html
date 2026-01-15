@@ -111,9 +111,7 @@
       </div>
     </div>
 
-    <!-- =========================
-         1) 메시지 생성기
-    ========================== -->
+    <!-- 1) 메시지 생성기 -->
     <section id="tab-msg" class="panel active">
       <div class="grid">
         <div class="card">
@@ -144,9 +142,7 @@
       </div>
     </section>
 
-    <!-- =========================
-         2) 수강료 계산기
-    ========================== -->
+    <!-- 2) 수강료 계산기 -->
     <section id="tab-fee" class="panel">
       <div class="grid">
         <div class="card">
@@ -222,9 +218,7 @@
       </div>
     </section>
 
-    <!-- =========================
-         3) 환불 계산기(B안)
-    ========================== -->
+    <!-- 3) 환불 계산기(B안) -->
     <section id="tab-refund" class="panel">
       <div class="grid">
         <div class="card">
@@ -289,9 +283,7 @@
       </div>
     </section>
 
-    <!-- =========================
-         4) 인강 환불 계산기 (수정 반영)
-    ========================== -->
+    <!-- 4) 인강 환불 계산기 -->
     <section id="tab-irefund" class="panel">
       <div class="grid">
         <div class="card">
@@ -310,15 +302,6 @@
             <div class="label">결제 후 경과일(자동)</div>
             <input id="irDaysSincePay" type="text" readonly value="-" />
 
-            <div class="label">제공 수강일수</div>
-            <input id="irProvidedDays" type="number" min="1" value="30" />
-
-            <div class="label">수강 상태</div>
-            <select id="irStatus">
-              <option value="none">미수강(수강내역 없음)</option>
-              <option value="using">수강중(수강내역 있음)</option>
-            </select>
-
             <div class="label">강의 선택</div>
             <select id="irCourseSelect"></select>
 
@@ -327,6 +310,15 @@
 
             <div class="label">전체 차시(자동)</div>
             <input id="irTotalLectures" type="number" min="1" value="16" readonly />
+
+            <div class="label">제공 수강일수(자동)</div>
+            <input id="irProvidedDays" type="number" min="1" value="180" readonly />
+
+            <div class="label">수강 상태</div>
+            <select id="irStatus">
+              <option value="none">미수강(수강내역 없음)</option>
+              <option value="using">수강중(수강내역 있음)</option>
+            </select>
 
             <div class="label">수강 차시</div>
             <input id="irUsedLectures" type="number" min="0" value="0" />
@@ -353,13 +345,12 @@
         </div>
       </div>
     </section>
-
   </div>
 
 <script>
-/* =========================================================
+/* =========================
    공통 유틸
-========================================================= */
+========================= */
 const moneyFmt = (n) => Number(n||0).toLocaleString('ko-KR');
 const onlyDigits = (s) => (String(s||'').replace(/[^\d]/g,''));
 const clamp = (x, a, b) => Math.min(Math.max(x, a), b);
@@ -385,9 +376,9 @@ function bindMoneyInput(el, {allowEmpty=false} = {}){
   });
 }
 
-/* =========================================================
+/* =========================
    탭 전환
-========================================================= */
+========================= */
 (function initTabs(){
   const btns = document.querySelectorAll('.tabbtn');
   const panels = {
@@ -409,10 +400,13 @@ function bindMoneyInput(el, {allowEmpty=false} = {}){
   });
 })();
 
-/* =========================================================
+/* =========================
    (A) 메시지 생성기
-========================================================= */
+========================= */
 const THEBOX_ADDRESS_FIXED = 'cafe 봄봄 옆 입구(엘리베이터)로 오셔서 6층으로 올라와주세요.';
+
+const BANK_ACCOUNT_ACADEMY = 'iM뱅크(구. 대구은행) 01086739664 더박스';
+const BANK_ACCOUNT_STUDY   = 'iM뱅크(구. 대구은행) 01085119664 더박스';
 
 const MSG_TYPES = [
   { key:'audit', label:'청강' },
@@ -530,7 +524,7 @@ const BLOCKS = {
   payBlock: `🔸결제 정보🔸
 - 금액 : {amount}
 - 결제방식 : 카드 (현장결제 / 모바일결제), 계좌이체, 온누리 및 대구로페이결제 가능
-- 이체시 결제 계좌 : iM뱅크(구. 대구은행) 01086739664 더박스
+- 이체시 결제 계좌 : {bankAccount}
 
 ▪ 온라인 링크로 카드 결제시 결제링크 받으실 번호 부탁 드립니다.
 ▪ 이체시에는 상기 계좌로 이체 후에 현금영수증 발급을 위한 번호 혹은 사업자등록번호도 함께 남겨주시면 됩니다.
@@ -839,7 +833,6 @@ function renderFields(){
     const s = document.createElement('select');
     let opts = [];
     if (msgState.type === 'study') opts = TIME_OPTIONS.study;
-    else if (msgState.type === 'academy' || msgState.type === 'academyResit') opts = TIME_OPTIONS.academyCommon;
     else opts = TIME_OPTIONS.academyCommon;
 
     s.innerHTML = opts.map(v=>`<option value="${v}">${v}</option>`).join('');
@@ -854,10 +847,7 @@ function renderFields(){
 
   if (fieldVisible('course')){
     const s = document.createElement('select');
-    let list = [];
-    if (msgState.type === 'study') list = STUDY_COURSES;
-    else if (msgState.type === 'academy' || msgState.type === 'academyResit') list = ACADEMY_COURSES;
-    else list = ACADEMY_COURSES;
+    const list = (msgState.type === 'study') ? STUDY_COURSES : ACADEMY_COURSES;
 
     s.innerHTML = list.map(v=>`<option value="${v}">${v}</option>`).join('');
     s.value = msgState.fields.course || list[0];
@@ -927,6 +917,10 @@ function renderFields(){
   });
 }
 
+function getBankAccountForCurrentType(){
+  return (String(msgState.type||'').trim() === 'study') ? BANK_ACCOUNT_STUDY : BANK_ACCOUNT_ACADEMY;
+}
+
 function applyVarsCommon(template){
   const month = String(msgState.fields.month||'').trim();
   const day = String(msgState.fields.day||'').trim();
@@ -935,13 +929,15 @@ function applyVarsCommon(template){
   const loc = String(msgState.fields.loc||'').trim();
   const amount = String(msgState.fields.amount||'').trim();
   const date = (month && day) ? `${month}월 ${day}일` : '';
+  const bankAccount = getBankAccountForCurrentType();
 
   let out = template
     .replaceAll('{date}', date)
     .replaceAll('{time}', time)
     .replaceAll('{course}', course)
     .replaceAll('{loc}', loc)
-    .replaceAll('{amount}', amount);
+    .replaceAll('{amount}', amount)
+    .replaceAll('{bankAccount}', bankAccount);
 
   out = out.split('\n').filter(line=>{
     if (!line.trim()) return true;
@@ -957,7 +953,6 @@ function applyVarsConsult(template){
   const m = String(msgState.fields.consultMonth||'').trim();
   const d = String(msgState.fields.consultDay||'').trim();
   const w = String(msgState.fields.consultWeekday||'').trim();
-
   const consultDate = (m && d && w) ? `${m}월 ${d}일 ${w}요일` : '';
 
   const other = String(msgState.fields.consultTimeOther||'').trim();
@@ -1000,8 +995,7 @@ function renderPreview(){
 
   if (msgState.type === 'academy') parts.push(BLOCKS.startAcademy);
   else if (msgState.type === 'academyResit') parts.push(BLOCKS.startResit);
-  else if (msgState.type === 'study') parts.push(BLOCKS.startStudy);
-  else parts.push(BLOCKS.startAcademy);
+  else parts.push(BLOCKS.startStudy);
 
   const order = ['enroll','pay','discount','cafe','schedule'];
   order.forEach(k=>{
@@ -1087,9 +1081,9 @@ document.getElementById('btnDemoMsg').addEventListener('click', ()=>{
   renderPreview();
 });
 
-/* =========================================================
+/* =========================
    (B) 수강료 계산기
-========================================================= */
+========================= */
 const FEE_TABLE = {
   academy: {
     groupA: {
@@ -1134,22 +1128,6 @@ const FEE_TABLE = {
       resit: [
         { key:'m1', label:'1개월 (185,000 / 기준 8)', baseSessions:8, baseAmount:185000 },
         { key:'m2', label:'2개월(2과목) (330,000 / 기준 16)', baseSessions:16, baseAmount:330000 },
-      ],
-    },
-    tinaOpic: {
-      label: '티나 오픽',
-      new: [{ key:'opic', label:'오픽 (210,000 / 총 8회)', baseSessions:8, baseAmount:210000 }],
-      resit:[{ key:'opic', label:'오픽 (210,000 / 총 8회)', baseSessions:8, baseAmount:210000 }],
-    },
-    zhaili: {
-      label: '짜이뤼 중국어',
-      new: [
-        { key:'m1', label:'1개월 (150,000 / 기준 8)', baseSessions:8, baseAmount:150000 },
-        { key:'m2', label:'2개월 (280,000 / 기준 16)', baseSessions:16, baseAmount:280000 },
-      ],
-      resit: [
-        { key:'m1', label:'1개월 (145,000 / 기준 8)', baseSessions:8, baseAmount:145000 },
-        { key:'m2', label:'2개월 (270,000 / 기준 16)', baseSessions:16, baseAmount:270000 },
       ],
     },
   },
@@ -1275,9 +1253,9 @@ feeEls.discReview.addEventListener('change', feeUpdate);
 feeEls.discOtherOn.addEventListener('change', ()=>{ feeEls.discOtherAmount.readOnly = !feeEls.discOtherOn.checked; feeUpdate(); });
 feeEls.discOtherAmount.addEventListener('input', feeUpdate);
 
-/* =========================================================
+/* =========================
    (C) 환불 계산기(B안)
-========================================================= */
+========================= */
 const RF_PRICES = {
   academy: {
     groupA: { label: '설린 / 유나 / 라일리 / 제인 / 티나 / 다이애나', new: { p8:170000, p16:300000 }, resit: { p8:165000, p16:290000 } },
@@ -1450,23 +1428,22 @@ rfEls.override.addEventListener('change', ()=>{
 });
 rfEls.paidAmountInput.addEventListener('input', calcRefund);
 
-/* =========================================================
-   (D) 인강 환불 계산기 (수정 반영)
-========================================================= */
+/* =========================
+   (D) 인강 환불 계산기
+========================= */
 const IR_COURSES = [
-  { key:'diana_basic_pkg', name:'Diana 바로영어 기초강좌 패키지', totalLectures:16, baseCost:299000 },
-  { key:'yuna_travel_2w', name:'Yuna 2주만에 끝내는 여행영어', totalLectures:16, baseCost:299000 },
-  { key:'james_basic_a', name:'James 진짜 영어 기초A', totalLectures:16, baseCost:299000 },
-  { key:'james_basic_b', name:'James 진짜 영어 기초B', totalLectures:16, baseCost:299000 },
-  { key:'james_basic_ab', name:'James 진짜 영어 기초A+B', totalLectures:32, baseCost:598000 },
-  { key:'cerline_verybasic_grammar', name:'Cerline 왕기초 문법 패키지', totalLectures:16, baseCost:299000 },
-  { key:'cerline_modal', name:'Cerline 핵심문법 조동사 패키지', totalLectures:14, baseCost:259000 },
-  { key:'cerline_advanced_grammar', name:'Cerline 심화 문법 패키지', totalLectures:16, baseCost:299000 },
-  { key:'cerline_modal_advanced', name:'Cerline 조동사+심화 패키지', totalLectures:30, baseCost:558000 },
-  { key:'cerline_verybasic_modal', name:'Cerline 왕기초문법+조동사 패키지', totalLectures:30, baseCost:558000 },
-  { key:'cerline_all', name:'Cerline 왕기초+조동사+심화패키지', totalLectures:46, baseCost:857000 },
-  { key:'cerline_overseas_travel', name:'Cerline 도전영어 해외여행 패키지', totalLectures:13, baseCost:209000 },
-  { key:'custom', name:'(직접입력)', totalLectures:16, baseCost:0 },
+  { key:'diana_basic_pkg', name:'Diana 바로영어 기초강좌 패키지', totalLectures:16, baseCost:299000, providedDays:180 },
+  { key:'yuna_travel_2w', name:'Yuna 2주만에 끝내는 여행영어', totalLectures:16, baseCost:299000, providedDays:180 },
+  { key:'james_basic_a', name:'James 진짜 영어 기초A', totalLectures:16, baseCost:299000, providedDays:180 },
+  { key:'james_basic_b', name:'James 진짜 영어 기초B', totalLectures:16, baseCost:299000, providedDays:180 },
+  { key:'james_basic_ab', name:'James 진짜 영어 기초A+B', totalLectures:32, baseCost:598000, providedDays:360 },
+  { key:'cerline_verybasic_grammar', name:'Cerline 왕기초 문법 패키지', totalLectures:16, baseCost:299000, providedDays:180 },
+  { key:'cerline_modal', name:'Cerline 핵심문법 조동사 패키지', totalLectures:14, baseCost:259000, providedDays:180 },
+  { key:'cerline_advanced_grammar', name:'Cerline 심화 문법 패키지', totalLectures:16, baseCost:299000, providedDays:180 },
+  { key:'cerline_modal_advanced', name:'Cerline 조동사+심화 패키지', totalLectures:30, baseCost:558000, providedDays:360 },
+  { key:'cerline_verybasic_modal', name:'Cerline 왕기초문법+조동사 패키지', totalLectures:30, baseCost:558000, providedDays:360 },
+  { key:'cerline_all', name:'Cerline 왕기초+조동사+심화패키지', totalLectures:46, baseCost:857000, providedDays:540 },
+  { key:'cerline_overseas_travel', name:'Cerline 도전영어 해외여행 패키지', totalLectures:13, baseCost:209000, providedDays:180 },
 ];
 
 const irEls = {
@@ -1474,11 +1451,11 @@ const irEls = {
   payDate: document.getElementById('irPayDate'),
   refundDate: document.getElementById('irRefundDate'),
   daysAuto: document.getElementById('irDaysSincePay'),
-  providedDays: document.getElementById('irProvidedDays'),
   status: document.getElementById('irStatus'),
   courseSelect: document.getElementById('irCourseSelect'),
   baseCost: document.getElementById('irBaseCost'),
   totalLectures: document.getElementById('irTotalLectures'),
+  providedDays: document.getElementById('irProvidedDays'),
   usedLectures: document.getElementById('irUsedLectures'),
   preview: document.getElementById('previewIR'),
 };
@@ -1498,8 +1475,7 @@ function irPopulateCourses(){
   IR_COURSES.forEach(c=>{
     const opt = document.createElement('option');
     opt.value = c.key;
-    opt.textContent = `${c.name} — ${c.totalLectures}강 / ${moneyFmt(c.baseCost)}원`;
-    if (c.key === 'custom') opt.textContent = `${c.name}`;
+    opt.textContent = `${c.name} — ${c.totalLectures}강 / ${moneyFmt(c.baseCost)}원 / ${c.providedDays}일`;
     irEls.courseSelect.appendChild(opt);
   });
   irEls.courseSelect.value = IR_COURSES[0].key;
@@ -1509,18 +1485,9 @@ function irApplyCourse(){
   const key = irEls.courseSelect.value;
   const c = IR_COURSES.find(x=>x.key===key) || IR_COURSES[0];
 
-  const isCustom = (key === 'custom');
-
-  irEls.totalLectures.readOnly = !isCustom;
-  irEls.baseCost.readOnly = !isCustom;
-
-  if (!isCustom){
-    irEls.totalLectures.value = c.totalLectures;
-    setMoneyInput(irEls.baseCost, c.baseCost);
-  } else {
-    if (!irEls.totalLectures.value || Number(irEls.totalLectures.value) <= 0) irEls.totalLectures.value = 16;
-    setMoneyInput(irEls.baseCost, parseMoneyText(irEls.baseCost.value));
-  }
+  irEls.totalLectures.value = c.totalLectures;
+  setMoneyInput(irEls.baseCost, c.baseCost);
+  irEls.providedDays.value = c.providedDays;
 }
 
 function irCalcElapsedDaysInclusive(){
@@ -1538,7 +1505,6 @@ function irCalcElapsedDaysInclusive(){
   const diff = Math.floor((reqD - payD) / msDay);
   if (diff < 0) return {ok:false, days:null, reason:'환불요청일자가 결제일자보다 빠릅니다.'};
 
-  // 결제일 포함(동일 날짜 = 1일)
   return {ok:true, days: diff + 1, reason:''};
 }
 
@@ -1548,7 +1514,7 @@ function irUpdate(){
 
   const elapsed = irCalcElapsedDaysInclusive();
   const provided = Math.max(0, Number(irEls.providedDays.value || 0));
-  const status = irEls.status.value; // none | using
+  const status = irEls.status.value;
 
   let daysSince = null;
   if (elapsed.ok){
@@ -1559,19 +1525,13 @@ function irUpdate(){
   }
 
   const baseCost = Math.max(0, parseMoneyText(irEls.baseCost.value));
-  if (!irEls.baseCost.readOnly) setMoneyInput(irEls.baseCost, baseCost);
-
   const totalL = Math.max(1, Number(irEls.totalLectures.value || 1));
   const usedLraw = Math.max(0, Number(irEls.usedLectures.value || 0));
   const usedL = clamp(usedLraw, 0, totalL);
 
-  // 학습수수료(차시 기준 고정)
   const learningFee = Math.round(baseCost * (usedL / totalL));
-
-  // 위약금(실결제 10%)
   const penalty = Math.round(paid * 0.10);
 
-  // 환불불가 체크
   let eligible = true;
   let blockReason = '';
 
@@ -1580,9 +1540,8 @@ function irUpdate(){
     blockReason = elapsed.reason;
   } else if (provided <= 0){
     eligible = false;
-    blockReason = '제공 수강일수를 입력해주세요.';
+    blockReason = '제공 수강일수가 올바르지 않습니다.';
   } else {
-    // 6) 경과일이 제공 수강일수를 초과하면(수강기간 종료) 환불 0
     if (daysSince > provided){
       eligible = false;
       blockReason = '수강기간 종료(환불 불가)';
@@ -1602,7 +1561,6 @@ function irUpdate(){
     ruleLabel = blockReason || '환불 불가';
   } else {
     if (status === 'none'){
-      // 미수강
       if (within7){
         refund = paid;
         ruleLabel = '미수강 + 7일 이내 → 100% 환불';
@@ -1611,7 +1569,6 @@ function irUpdate(){
         ruleLabel = '미수강 + 7일 이후 → 위약금(10%) 공제';
       }
     } else {
-      // 수강중
       if (within7){
         refund = Math.max(0, paid - learningFee);
         ruleLabel = '수강중 + 7일 이내 → 학습수수료 공제';
@@ -1660,19 +1617,16 @@ document.getElementById('btnResetIR').addEventListener('click', ()=>{
   irEls.payDate.value = iso;
   irEls.refundDate.value = iso;
 
-  irEls.providedDays.value = 30;
   irEls.status.value = 'none';
-
   irEls.courseSelect.value = IR_COURSES[0].key;
   irApplyCourse();
-
   irEls.usedLectures.value = 0;
   irUpdate();
 });
 
-/* =========================================================
+/* =========================
    초기화 실행
-========================================================= */
+========================= */
 initMsg();
 
 // fee init
@@ -1689,11 +1643,10 @@ irPopulateCourses();
 irSetDefaultDates();
 irApplyCourse();
 bindMoneyInput(irEls.paid);
-bindMoneyInput(irEls.baseCost, {allowEmpty:true});
 
 [
-  irEls.payDate, irEls.refundDate, irEls.providedDays, irEls.status,
-  irEls.courseSelect, irEls.baseCost, irEls.totalLectures, irEls.usedLectures, irEls.paid
+  irEls.payDate, irEls.refundDate, irEls.status,
+  irEls.courseSelect, irEls.usedLectures
 ].forEach(el=>{
   el.addEventListener('input', ()=>{
     if (el === irEls.courseSelect) irApplyCourse();
