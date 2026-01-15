@@ -415,6 +415,10 @@ function bindMoneyInput(el, {allowEmpty=false} = {}){
 ========================================================= */
 const THEBOX_ADDRESS_FIXED = 'cafe 봄봄 옆 입구(엘리베이터)로 오셔서 6층으로 올라와주세요.';
 
+// 결제 계좌 (아카데미/스터디 분리)
+const BANK_ACCOUNT_ACADEMY = 'iM뱅크(구. 대구은행) 01086739664 더박스';
+const BANK_ACCOUNT_STUDY   = 'iM뱅크(구. 대구은행) 01085119664 더박스';
+
 const MSG_TYPES = [
   { key:'audit', label:'청강' },
   { key:'consult', label:'상담톡' },
@@ -528,10 +532,11 @@ const BLOCKS = {
 - 수강명 : {course}
 - 위치 : {loc}
 `,
+  // payBlock 내 계좌는 {bankAccount} 변수로 치환
   payBlock: `🔸결제 정보🔸
 - 금액 : {amount}
 - 결제방식 : 카드 (현장결제 / 모바일결제), 계좌이체, 온누리 및 대구로페이결제 가능
-- 이체시 결제 계좌 : iM뱅크(구. 대구은행) 01086739664 더박스
+- 이체시 결제 계좌 : {bankAccount}
 
 ▪ 온라인 링크로 카드 결제시 결제링크 받으실 번호 부탁 드립니다.
 ▪ 이체시에는 상기 계좌로 이체 후에 현금영수증 발급을 위한 번호 혹은 사업자등록번호도 함께 남겨주시면 됩니다.
@@ -928,6 +933,13 @@ function renderFields(){
   });
 }
 
+// 유형(스터디/아카데미)에 따른 계좌 선택
+function getBankAccountForCurrentType(){
+  const t = String(msgState.type||'').trim();
+  if (t === 'study') return BANK_ACCOUNT_STUDY;
+  return BANK_ACCOUNT_ACADEMY;
+}
+
 function applyVarsCommon(template){
   const month = String(msgState.fields.month||'').trim();
   const day = String(msgState.fields.day||'').trim();
@@ -937,12 +949,15 @@ function applyVarsCommon(template){
   const amount = String(msgState.fields.amount||'').trim();
   const date = (month && day) ? `${month}월 ${day}일` : '';
 
+  const bankAccount = getBankAccountForCurrentType();
+
   let out = template
     .replaceAll('{date}', date)
     .replaceAll('{time}', time)
     .replaceAll('{course}', course)
     .replaceAll('{loc}', loc)
-    .replaceAll('{amount}', amount);
+    .replaceAll('{amount}', amount)
+    .replaceAll('{bankAccount}', bankAccount);
 
   out = out.split('\n').filter(line=>{
     if (!line.trim()) return true;
@@ -1461,7 +1476,7 @@ const IR_COURSES = [
   { key:'james_basic_b', name:'James 진짜 영어 기초B', totalLectures:16, baseCost:299000, providedDays:180 },
   { key:'james_basic_ab', name:'James 진짜 영어 기초A+B', totalLectures:32, baseCost:598000, providedDays:360 },
   { key:'cerline_verybasic_grammar', name:'Cerline 왕기초 문법 패키지', totalLectures:16, baseCost:299000, providedDays:180 },
-  { key:'cerline_modal', name:'Cerline 핵심문법 조동사 패키지', totalLectures:14, baseCost:259000, providedDays:180 },
+  { key:'cerline_modal', name:'Cerline 핵심문법 조동사 패키지', totalLectures:14, baseCost:259000,, providedDays:180 },
   { key:'cerline_advanced_grammar', name:'Cerline 심화 문법 패키지', totalLectures:16, baseCost:299000, providedDays:180 },
   { key:'cerline_modal_advanced', name:'Cerline 조동사+심화 패키지', totalLectures:30, baseCost:558000, providedDays:360 },
   { key:'cerline_verybasic_modal', name:'Cerline 왕기초문법+조동사 패키지', totalLectures:30, baseCost:558000, providedDays:360 },
@@ -1516,7 +1531,6 @@ function irApplyCourse(){
 
   irEls.totalLectures.readOnly = !isCustom;
   irEls.baseCost.readOnly = !isCustom;
-  // 제공 수강일수는 요청대로 자동 입력 고정(직접입력도 기본값 자동으로 채워짐)
   irEls.providedDays.readOnly = !isCustom ? true : false;
 
   if (!isCustom){
@@ -1545,7 +1559,6 @@ function irCalcElapsedDaysInclusive(){
   const diff = Math.floor((reqD - payD) / msDay);
   if (diff < 0) return {ok:false, days:null, reason:'환불요청일자가 결제일자보다 빠릅니다.'};
 
-  // 결제일 포함(동일 날짜 = 1일)
   return {ok:true, days: diff + 1, reason:''};
 }
 
@@ -1585,7 +1598,6 @@ function irUpdate(){
     eligible = false;
     blockReason = '제공 수강일수를 입력해주세요.';
   } else {
-    // 6) 경과일이 제공 수강일수보다 크면 0원
     if (daysSince > provided){
       eligible = false;
       blockReason = '수강기간 종료(환불 불가)';
