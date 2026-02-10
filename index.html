@@ -254,8 +254,47 @@
 
             <div class="label">결제 금액(자동)</div>
             <input id="rfPaidAmount" type="text" readonly />
+            
 
             <div class="label">결제 금액 직접입력</div>
+
+<div class="label">환불 금액(자동)</div>
+<input id="rfRefundAmount" type="text" readonly />
+
+// ✅ 2) rfEls에 환불금액 input 엘리먼트 추가
+const rfEls = {
+  cat: document.getElementById('rfCat'),
+  group: document.getElementById('rfGroup'),
+  payType: document.getElementById('rfPayType'),
+  paidSessions: document.getElementById('rfPaidSessions'),
+  usedSessions: document.getElementById('rfUsedSessions'),
+  paidAmount: document.getElementById('rfPaidAmount'),
+  override: document.getElementById('rfOverride'),
+  paidAmountInput: document.getElementById('rfPaidAmountInput'),
+  // ✅ 추가
+  refundAmount: document.getElementById('rfRefundAmount'),
+  preview: document.getElementById('previewRefund')
+};
+
+// ✅ 3) calcRefund() 마지막 부분(프리뷰 채우기 직전/직후 아무데나)에서
+// 계산된 refund 값을 input에도 표시
+function calcRefund(){
+  // ... (기존 계산 로직 그대로)
+
+  // ✅ autoPaid 세팅(기존)
+  const autoPaid = calcPaidAmountFromSessions();
+  rfEls.paidAmount.value = moneyFmt(autoPaid);
+
+  // ✅ 환불금액 input 표시(추가)
+  if (rfEls.refundAmount) {
+    rfEls.refundAmount.value = moneyFmt(refund) + '원';
+  }
+
+  // ... (기존 preview lines 작성 그대로)
+}
+
+
+            
             <label class="chip" style="grid-column:2/3;justify-content:flex-start;">
               <input type="checkbox" id="rfOverride">
               <span class="check"><span class="tick"></span></span>
