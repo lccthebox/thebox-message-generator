@@ -252,8 +252,11 @@
             <div class="label">소진 회차수</div>
             <input id="rfUsedSessions" type="number" min="0" value="0" />
 
-            <div class="label">결제 금액(자동)</div>
-            <input id="rfPaidAmount" type="text" readonly />
+<div class="label">결제 금액(자동)</div>
+<input id="rfPaidAmount" type="text" readonly />
+
+<div class="label">환불 금액(자동)</div>
+<input id="rfRefundAmount" type="text" readonly />
 
             <div class="label">결제 금액 직접입력</div>
             <label class="chip" style="grid-column:2/3;justify-content:flex-start;">
@@ -1275,7 +1278,7 @@ feeEls.discOtherOn.addEventListener('change', ()=>{ feeEls.discOtherAmount.readO
 feeEls.discOtherAmount.addEventListener('input', feeUpdate);
 
 /* =========================================================
-   (C) 환불 계산기(B안)
+   (C) 환불 계산기(B안)  ✅ 오류 수정 완료(로직 완성 + 중괄호 정리)
 ========================================================= */
 const RF_PRICES = {
   academy: {
@@ -1296,6 +1299,7 @@ const rfEls = {
   paidSessions: document.getElementById('rfPaidSessions'),
   usedSessions: document.getElementById('rfUsedSessions'),
   paidAmount: document.getElementById('rfPaidAmount'),
+  refundAmount: document.getElementById('rfRefundAmount'),
   override: document.getElementById('rfOverride'),
   paidAmountInput: document.getElementById('rfPaidAmountInput'),
   preview: document.getElementById('previewRefund')
@@ -1312,6 +1316,7 @@ function rfGroupOptions(){
     rfEls.group.appendChild(opt);
   });
 }
+
 function calcPaidAmountFromSessions(){
   const cat = rfEls.cat.value;
   const groupKey = rfEls.group.value;
@@ -1330,14 +1335,33 @@ function calcPaidAmountFromSessions(){
   }
 }
 
+/**
+ * 공통 환불비율(used/total 기준)
+ * - ≤1/3: 2/3
+ * - ≤1/2: 1/2
+ * - >1/2: 0
+ */
+function ratioRefund(amount, used, total){
+  if (total <= 0) return {refund:0, label:'계산 불가'};
+  const r = used / total;
+  if (r <= (1/3)) return {refund: Math.round(amount * (2/3)), label:'1/3 이하 → 2/3 환불'};
+  if (r <= (1/2)) return {refund: Math.round(amount * (1/2)), label:'1/3 초과~1/2 이하 → 1/2 환불'};
+  return {refund: 0, label:'1/2 초과 → 환불 없음'};
+}
+
 function calcRefund(){
   const cat = rfEls.cat.value;
   const N = Number(rfEls.paidSessions.value || 0);
   const U = Number(rfEls.usedSessions.value || 0);
   const override = rfEls.override.checked;
 
-  let paid = override ? Number(rfEls.paidAmountInput.value || 0) : calcPaidAmountFromSessions();
+  // 결제금액
+  const paidAuto = calcPaidAmountFromSessions();
+  rfEls.paidAmount.value = moneyFmt(paidAuto);
 
+  let paid = override ? Number(rfEls.paidAmountInput.value || 0) : paidAuto;
+
+  // 기본 가드
   let refund = 0;
   let rateLabel = '';
 
@@ -1347,73 +1371,48 @@ function calcRefund(){
   } else {
     const used = clamp(U, 0, N);
 
-   if (cat === 'academy' && N > 8) {
-  if (used === 0) {
-    refund = paid;
-    rateLabel = '사용 0회 (전액)';
-  } else {
-
-    const gk = rfEls.group.value;
-    const payType = rfEls.payType.value;
-    const { p8 } = RF_PRICES.academy[gk][payType];
-
-    const first8Amount = p8;
-    const remainAmount = Math.max(0, paid - first8Amount);
-
-    // ✅ [신규 규칙] N이 9~16이고, 사용이 8회 이하인 경우:
-    // 환불 구간을 "8회 금액" 기준으로 계산 + 잔금(remainAmount) 그대로 더함
-    if (N <= 16 && used <= 8) {
-      const r = used / 8;
-      let first8Refund = 0;
-
-      if (r <= (1/3)) {
-        first8Refund = Math.round(first8Amount * (2/3));
-        rateLabel = '8회구간 1/3 이하 → (8회금액의) 2/3 환불 + 잔금';
-      } else if (r <= (1/2)) {
-        first8Refund = Math.round(first8Amount * (1/2));
-        rateLabel = '8회구간 1/3 초과~1/2 이하 → (8회금액의) 1/2 환불 + 잔금';
-      } else {
-        first8Refund = 0;
-        rateLabel = '8회구간 1/2 초과 → (8회금액) 환불 없음 + 잔금';
-      }
-
-      refund = Math.round(first8Refund + remainAmount);
-
+    // 0회 사용이면 전액 환불
+    if (used === 0){
+      refund = paid;
+      rateLabel = '사용 0회 (전액)';
     } else {
-      // 기존 로직(8회 초과 사용 시): "첫 8회 금액 제외" 후 추가구간만 환불 계산
-      const total2 = Math.max(0, N - 8);
-      const used2  = clamp(Math.max(0, used - 8), 0, total2);
+      // ✅ 아카데미 + 8회 초과 결제인 경우(B안)
+      if (cat === 'academy' && N > 8){
+        const gk = rfEls.group.value;
+        const payType = rfEls.payType.value;
+        const first8Amount = RF_PRICES.academy[gk][payType].p8;     // 8회 금액(고정)
+        const remainAmount = Math.max(0, paid - first8Amount);      // 잔금(추가분)
 
-      if (total2 === 0 || remainAmount === 0) {
-        refund = 0;
-        rateLabel = '추가 결제 없음';
-      } else {
-        if (used2 === 0) {
-          refund = Math.round(remainAmount);
-          rateLabel = '추가구간 사용 0회 → 전액 환불';
+        // ✅ 신규 규칙: 9~16회 결제 + 사용 8회 이하 → "8회금액 기준" 환불 + 잔금 그대로 더함
+        if (N <= 16 && used <= 8){
+          const rr = ratioRefund(first8Amount, used, 8);
+          refund = Math.round(rr.refund + remainAmount);
+          rateLabel = `8회구간 기준 ${rr.label} + 잔금`;
         } else {
-          const r2 = used2 / total2;
-          if (r2 <= (1/3)) {
-            refund = Math.round(remainAmount * (2/3));
-            rateLabel = '추가구간 1/3 이하 → 2/3 환불';
-          } else if (r2 <= (1/2)) {
-            refund = Math.round(remainAmount * (1/2));
-            rateLabel = '추가구간 1/3 초과~1/2 이하 → 1/2 환불';
-          } else {
+          // 기존 B안: (결제금액 - 8회금액)만 추가구간 비율로 환불
+          const total2 = Math.max(0, N - 8);
+          const used2 = clamp(Math.max(0, used - 8), 0, total2);
+
+          if (total2 === 0 || remainAmount === 0){
             refund = 0;
-            rateLabel = '추가구간 1/2 초과 → 환불 없음';
+            rateLabel = '추가 결제 없음';
+          } else if (used2 === 0){
+            refund = Math.round(remainAmount);
+            rateLabel = '추가구간 사용 0회 → 전액 환불';
+          } else {
+            const rr2 = ratioRefund(remainAmount, used2, total2);
+            refund = rr2.refund;
+            rateLabel = `추가구간 기준 ${rr2.label}`;
           }
         }
+      } else {
+        // ✅ 그 외(아카데미 8회 이하 / 스터디 전부): 전체 결제금액에 표 비율 적용
+        const rr = ratioRefund(paid, used, N);
+        refund = rr.refund;
+        rateLabel = rr.label;
       }
     }
   }
-} else {
-  // (기존 academy N<=8 or study 로직 그대로)
-}
-
-
-  const autoPaid = calcPaidAmountFromSessions();
-  rfEls.paidAmount.value = moneyFmt(autoPaid);
 
   const lines = [];
   lines.push('[환불 계산 결과]');
@@ -1458,7 +1457,7 @@ rfEls.override.addEventListener('change', ()=>{
 rfEls.paidAmountInput.addEventListener('input', calcRefund);
 
 /* =========================================================
-   (D) 인강 환불 계산기 (수정 반영: 제공 수강일수 자동)
+   (D) 인강 환불 계산기 (제공 수강일수 자동)
 ========================================================= */
 const IR_COURSES = [
   { key:'diana_basic_pkg', name:'Diana 바로영어 기초강좌 패키지', totalLectures:16, baseCost:299000, providedDays:180 },
@@ -1522,7 +1521,6 @@ function irApplyCourse(){
 
   irEls.totalLectures.readOnly = !isCustom;
   irEls.baseCost.readOnly = !isCustom;
-  // 제공 수강일수는 요청대로 자동 입력 고정(직접입력도 기본값 자동으로 채워짐)
   irEls.providedDays.readOnly = !isCustom ? true : false;
 
   if (!isCustom){
@@ -1551,7 +1549,6 @@ function irCalcElapsedDaysInclusive(){
   const diff = Math.floor((reqD - payD) / msDay);
   if (diff < 0) return {ok:false, days:null, reason:'환불요청일자가 결제일자보다 빠릅니다.'};
 
-  // 결제일 포함(동일 날짜 = 1일)
   return {ok:true, days: diff + 1, reason:''};
 }
 
@@ -1591,7 +1588,6 @@ function irUpdate(){
     eligible = false;
     blockReason = '제공 수강일수를 입력해주세요.';
   } else {
-    // 6) 경과일이 제공 수강일수보다 크면 0원
     if (daysSince > provided){
       eligible = false;
       blockReason = '수강기간 종료(환불 불가)';
@@ -1646,9 +1642,11 @@ function irUpdate(){
   lines.push(`- 위약금(10%): ${moneyFmt(penalty)}원`);
   lines.push(`- 적용 규칙: ${ruleLabel}`);
   lines.push('--------------------');
+  lines.push('--------------------');
   lines.push(`최종 환불금액: ${moneyFmt(refund)}원`);
 
-  irEls.preview.textContent = lines.join('\n') + '\n';
+  rfEls.refundAmount.value = moneyFmt(refund) + '원'; 
+  rfEls.preview.textContent = lines.join('\n') + '\n';
 }
 
 document.getElementById('btnCopyIR').addEventListener('click', async ()=>{
