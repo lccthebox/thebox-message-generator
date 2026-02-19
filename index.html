@@ -788,12 +788,18 @@ function renderTypeChips(){
             : (DEFAULT_PRICE_TEXT.academy[first] || '');
       }
 
-      if (msgState.type === 'audit'){
-        msgState.fields.time = TIME_OPTIONS.study[0];
-        msgState.fields.auditCourse = '원어민 회화스터디';
-        msgState.fields.auditLoc = '6층';
-        msgState.fields.auditFeeStatus = 'paid';
-      }
+if (msgState.type === 'audit'){
+  // 청강톡은 아카데미 안내(course/loc)와 동일하게
+  const c = msgState.fields.course || ACADEMY_COURSES[0];
+  msgState.fields.course = c;
+  msgState.fields.loc = (LOCATIONS[c] || [''])[0];
+
+  // 청강 시간도 아카데미 시간대 기준으로
+  msgState.fields.time = TIME_OPTIONS.academyCommon[0];
+
+  msgState.fields.auditFeeStatus = 'paid';
+}
+
 
       if (msgState.type === 'studyExtend'){
         msgState.fields.extendPrice = DEFAULT_PRICE_TEXT.studyExtend['원어민 회화스터디'];
@@ -881,13 +887,13 @@ function fieldVisible(fieldKey){
   if (t === 'cert' || t === 'nativeInquiry') return false;
 
   // 청강
-  if (t === 'audit'){
-    if (msgState.sections.has('auditInfo')){
-      if (['month','day','time','auditCourse','auditLoc'].includes(fieldKey)) return true;
-    }
-    if (fieldKey === 'auditFeeStatus') return msgState.sections.has('auditFee');
-    return false;
+if (t === 'audit'){
+  if (msgState.sections.has('auditInfo')){
+    if (['month','day','time','course','loc'].includes(fieldKey)) return true;
   }
+  if (fieldKey === 'auditFeeStatus') return msgState.sections.has('auditFee');
+  return false;
+}
 
   // 스터디 시작
   if (t === 'studyStart'){
@@ -1028,20 +1034,6 @@ function renderFields(){
   }
 
   // 청강
-  if (fieldVisible('auditCourse')){
-    const i = document.createElement('input');
-    i.type='text';
-    i.value = msgState.fields.auditCourse || '';
-    i.addEventListener('input', ()=>{ msgState.fields.auditCourse = i.value; renderPreview(); });
-    addRow('수강명', i);
-  }
-  if (fieldVisible('auditLoc')){
-    const i = document.createElement('input');
-    i.type='text';
-    i.value = msgState.fields.auditLoc || '';
-    i.addEventListener('input', ()=>{ msgState.fields.auditLoc = i.value; renderPreview(); });
-    addRow('위치', i);
-  }
   if (fieldVisible('auditFeeStatus')){
     const wrap = document.createElement('div');
     wrap.className = 'inline';
@@ -1226,10 +1218,11 @@ function renderPreview(){
 
     if (msgState.sections.has('auditInfo')){
       parts.push(applyVars(BLOCKS.auditInfoBlock, {
-        date, time,
-        course: String(msgState.fields.auditCourse||'').trim(),
-        loc: String(msgState.fields.auditLoc||'').trim()
-      }));
+  date, time,
+  course: String(msgState.fields.course||'').trim(),
+  loc: String(msgState.fields.loc||'').trim()
+}));
+
     }
 
     if (msgState.sections.has('auditFee')){
@@ -1355,8 +1348,6 @@ document.getElementById('btnResetMsg').addEventListener('click', ()=>{
   msgState.fields.loc = (LOCATIONS[ACADEMY_COURSES[0]]||[''])[0];
   msgState.fields.amountAcademy = DEFAULT_PRICE_TEXT.academy[ACADEMY_COURSES[0]] || '';
 
-  msgState.fields.auditCourse = '원어민 회화스터디';
-  msgState.fields.auditLoc = '6층';
   msgState.fields.auditFeeStatus = 'paid';
 
   const tmr = getTomorrowKST();
