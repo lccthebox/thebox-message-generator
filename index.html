@@ -480,7 +480,7 @@ const LOCATIONS = {
 
 const TIME_OPTIONS = {
   study: ['오전 11시','오후 8시','오후 1시'],
-  academyCommon: ['오전 9시 30분','오전 10시 30분','오전 11시 30분','오전 11시 45분','오후 12시','오후 1시','오후 1시 30분','오후 6시 50분','오후 8시 30분', '오후 8시 45분']
+  academyCommon: ['오전 9시 30분','오전 10시 30분','오전 11시 30분','오전 11시 45분','오후 12시','오후 1시','오후 1시 30분','오후 6시 30분','오후 6시 50분','오후 8시 30분', '오후 8시 45분']
 };
 
 const STUDY_LEVELS = [
@@ -514,10 +514,12 @@ const DEFAULT_PRICE_TEXT = {
     '코트니 Go-to영어': '1개월(8회) - 18.5만원 / 2개월(16회) - 33만원',
     '짜이뤼 중국어': '1개월(8회) - 14.5만원 / 2개월(16회) - 27만원',
   },
-  study: { '원어민 회화스터디': '8회 15만원, 16회 277,000원, 32회 494,000원' },
-  // 연장 결제 안내(요청 반영): 32회 454,000원
-  studyExtend: { '원어민 회화스터디': '8회 150,000원 / 16회 277,000원 / 32회 454,000원' }
-};
+study: {
+  '원어민 회화스터디': '16회 277,000원 (최대 사용기간 3개월)\n32회 494,000원 (최대 사용기간 6개월)'
+},
+studyExtend: {
+  '원어민 회화스터디': '16회 277,000원 (최대 사용기간 3개월)\n32회 454,000원 (최대 사용기간 6개월)'
+}
 
 const DEFAULT_SECTIONS_BY_TYPE = {
   consult: [],
@@ -1256,11 +1258,12 @@ function renderPreview(){
         level: String(msgState.fields.level||'').trim()
       }));
     }
-    if (msgState.sections.has('pay')){
-      parts.push(applyVars(BLOCKS.payStudyBlock, {
-        amount: String(msgState.fields.amountStudy||'').trim()
-      }));
-    }
+   if (msgState.sections.has('pay')){
+  const raw = String(msgState.fields.amountStudy||'').trim();
+  const pretty = raw.replace(/\n/g, '\n         '); // ← 공백 개수로 들여쓰기 조절
+  parts.push(applyVars(BLOCKS.payStudyBlock, { amount: pretty }));
+}
+
     if (msgState.sections.has('discount')) parts.push(BLOCKS.discountBlock.trim() + '\n');
     if (msgState.sections.has('cafe')) parts.push(BLOCKS.cafeBlock.trim() + '\n');
 
@@ -1313,9 +1316,10 @@ function renderPreview(){
       }));
     }
     if (msgState.sections.has('creditPay')){
-      parts.push(applyVars(BLOCKS.creditPayBlock, {
-        extendPrice: String(msgState.fields.extendPrice||'').trim()
-      }));
+const raw = String(msgState.fields.extendPrice||'').trim();
+const pretty = raw.replace(/\n/g, '\n         ');
+parts.push(applyVars(BLOCKS.creditPayBlock, { extendPrice: pretty }));
+
     }
 
     previewMsg.textContent = parts.join('\n').replace(/\n{3,}/g,'\n\n').trim() + '\n';
