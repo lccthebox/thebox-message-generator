@@ -1317,7 +1317,7 @@ function renderPreview(){
     }
     if (msgState.sections.has('creditPay')){
 const raw = String(msgState.fields.extendPrice||'').trim();
-const pretty = raw.replace(/\n/g, '\n                ');
+const pretty = raw.replace(/\n/g, '\n                  ');
 parts.push(applyVars(BLOCKS.creditPayBlock, { extendPrice: pretty }));
 
     }
