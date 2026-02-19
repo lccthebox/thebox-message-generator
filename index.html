@@ -1020,9 +1020,10 @@ function renderFields(){
 
   if (fieldVisible('time')){
     const s = document.createElement('select');
-    let opts = [];
-    if (msgState.type === 'studyStart' || msgState.type === 'audit') opts = TIME_OPTIONS.study;
-    else opts = TIME_OPTIONS.academyCommon;
+let opts = [];
+if (msgState.type === 'studyStart') opts = TIME_OPTIONS.study;
+else opts = TIME_OPTIONS.academyCommon; // audit 포함해서 전부 아카데미 시간 옵션
+
 
     s.innerHTML = opts.map(v=>`<option value="${v}">${v}</option>`).join('');
     s.value = msgState.fields.time || opts[0];
