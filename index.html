@@ -1634,8 +1634,12 @@ const RF_PRICES = {
     courtney: { label:'코트니', new: { p8:190000, p16:340000 }, resit: { p8:185000, p16:330000 } }
   },
   study: {
-    only:{ label:'원어민 회화스터디', new: { p8:150000, p16:277000, p32:494000 }, resit: { p8:150000, p16:277000, p32:494000 } }
+  only:{
+    label:'원어민 회화스터디',
+    new:  { p8:150000, p16:277000, p32:494000, p48:657000 },
+    resit:{ p8:150000, p16:277000, p32:494000, p48:657000 }
   }
+}
 };
 
 const rfEls = {
@@ -1671,12 +1675,13 @@ function calcPaidAmountFromSessions(){
     const price = RF_PRICES.academy[groupKey][payType];
     if (N <= 8) return Math.round(price.p8 * (N / 8));
     return Math.round(price.p16 * (N / 16));
-  } else {
-    const price = RF_PRICES.study[groupKey][payType];
-    if (N <= 8) return Math.round(price.p8 * (N / 8));
-    if (N <= 16) return Math.round(price.p16 * (N / 16));
-    return Math.round(price.p32 * (N / 32));
-  }
+} else {
+  const price = RF_PRICES.study[groupKey][payType];
+  if (N <= 8)  return Math.round(price.p8  * (N / 8));
+  if (N <= 16) return Math.round(price.p16 * (N / 16));
+  if (N <= 32) return Math.round(price.p32 * (N / 32));
+  if (N <= 48) return Math.round(price.p48 * (N / 48));
+}
 }
 
 function calcRefund(){
