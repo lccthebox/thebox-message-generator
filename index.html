@@ -1664,6 +1664,7 @@ function rfGroupOptions(){
     opt.textContent = groups[k].label;
     rfEls.group.appendChild(opt);
   });
+}
 function calcPaidAmountFromSessions(){
   const cat = rfEls.cat.value;
   const groupKey = rfEls.group.value;
@@ -1680,8 +1681,6 @@ function calcPaidAmountFromSessions(){
     if (N <= 16) return Math.round(price.p16 * (N / 16));
     if (N <= 32) return Math.round(price.p32 * (N / 32));
     if (N <= 48) return Math.round(price.p48 * (N / 48));
-
-    // ✅ 48회 초과: 48회 기준(657,000) 회당단가로 비례 계산
     return Math.round(price.p48 * (N / 48));
   }
 }
