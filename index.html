@@ -1675,13 +1675,16 @@ function calcPaidAmountFromSessions(){
     const price = RF_PRICES.academy[groupKey][payType];
     if (N <= 8) return Math.round(price.p8 * (N / 8));
     return Math.round(price.p16 * (N / 16));
-} else {
-  const price = RF_PRICES.study[groupKey][payType];
-  if (N <= 8)  return Math.round(price.p8  * (N / 8));
-  if (N <= 16) return Math.round(price.p16 * (N / 16));
-  if (N <= 32) return Math.round(price.p32 * (N / 32));
-  if (N <= 48) return Math.round(price.p48 * (N / 48));
-}
+  } else {
+    const price = RF_PRICES.study[groupKey][payType];
+    if (N <= 8)  return Math.round(price.p8  * (N / 8));
+    if (N <= 16) return Math.round(price.p16 * (N / 16));
+    if (N <= 32) return Math.round(price.p32 * (N / 32));
+    if (N <= 48) return Math.round(price.p48 * (N / 48));
+
+    // ✅ 48회 초과: 48회 기준(657,000) 회당단가로 비례 계산
+    return Math.round(price.p48 * (N / 48));
+  }
 }
 
 function calcRefund(){
