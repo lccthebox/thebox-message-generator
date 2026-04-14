@@ -866,24 +866,23 @@ const MSG_SECTIONS = [
 ];
 
 const ACADEMY_COURSES = [
-  '설린 도전영어','유나 YouNow영어','라일리 Right 영어','제인 제일영어','티나 트렌디영어','다이애나 바로영어',
-  '티나 오픽','제임스 진짜영어','크리스 미디어영어','코트니 Go-to영어','짜이뤼 중국어',
+  '설린 도전영어','라일리 Right 영어','제인 제일영어','티나 트렌디영어','다이애나 바로영어',
+  '티나 오픽','제임스 진짜영어','크리스 미디어영어','코트니 Go-to영어','주디 Judy영어','짜이뤼 중국어',
 ];
 const LOCATIONS = {
-  '설린 도전영어': ['7층 704호'],'유나 YouNow영어': ['8층 806호'],'라일리 Right 영어': ['8층 801호'],
+  '설린 도전영어': ['7층 704호'],'라일리 Right 영어': ['8층 801호'],
   '제인 제일영어': ['7층 701호'],'티나 트렌디영어': ['8층 805호'],'다이애나 바로영어': ['7층 704호'],
-  '티나 오픽': ['8층 805호'],'제임스 진짜영어': ['7층 703호'],'크리스 미디어영어': ['8층 803호'],
-  '코트니 Go-to영어': ['8층 807호'],'짜이뤼 중국어': ['7층 705호'],
+  '티나 오픽': ['8층 805호'],'제임스 진짜영어': ['7층 703호'],'크리스 미디어영어': ['8층 806호'],
+  '코트니 Go-to영어': ['8층 807호'],'주디 Judy영어': ['8층 803호'],'짜이뤼 중국어': ['7층 705호'],
 };
 const TIME_OPTIONS = {
   study: ['오전 11시','오후 8시','오후 1시'],
-  academyCommon: ['오전 9시 30분','오전 10시 30분','오전 11시 30분','오전 11시 45분','오후 12시','오후 1시','오후 1시 30분','오후 6시 30분','오후 6시 50분','오후 8시 30분','오후 8시 45분']
+  academyCommon: ['오전 9시 30분','오전 10시','오전 10시 30분','오전 11시 30분','오전 11시 45분','오후 12시','오후 1시','오후 1시 30분','오후 6시 30분','오후 6시 50분','오후 8시 30분','오후 8시 45분']
 };
 const STUDY_LEVELS = ['Beginner','Pre-intermediate','Intermediate','Upper intermediate','Advanced Low','Advanced'];
 const DEFAULT_PRICE_TEXT = {
   academy: {
     '설린 도전영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
-    '유나 YouNow영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
     '라일리 Right 영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
     '제인 제일영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
     '티나 트렌디영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
@@ -892,11 +891,11 @@ const DEFAULT_PRICE_TEXT = {
     '제임스 진짜영어': '1개월(8회) - 19만원 / 2개월(16회) - 32만원',
     '크리스 미디어영어': '1개월(8회) - 18만원 / 2개월(16회) - 31만원',
     '코트니 Go-to영어': '1개월(8회) - 19만원 / 2개월(16회) - 34만원',
+    '주디 Judy영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
     '짜이뤼 중국어': '1개월(8회) - 15만원 / 2개월(16회) - 28만원',
   },
   academyResit: {
     '설린 도전영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
-    '유나 YouNow영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
     '라일리 Right 영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
     '제인 제일영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
     '티나 트렌디영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
@@ -905,6 +904,7 @@ const DEFAULT_PRICE_TEXT = {
     '제임스 진짜영어': '1개월(8회) - 18.5만원 / 2개월(16회) - 31만원',
     '크리스 미디어영어': '1개월(8회) - 17.5만원 / 2개월(16회) - 30만원',
     '코트니 Go-to영어': '1개월(8회) - 18.5만원 / 2개월(16회) - 33만원',
+    '주디 Judy영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
     '짜이뤼 중국어': '1개월(8회) - 14.5만원 / 2개월(16회) - 27만원',
   },
   study: {
@@ -1177,7 +1177,7 @@ document.getElementById('btnDemoMsg').addEventListener('click',()=>{
 ========================================================= */
 const FEE_TABLE = {
   academy:{
-    groupA:{label:'설린 / 유나 / 라일리 / 제인 / 티나 / 다이애나',new:[{key:'m1',label:'1개월 (170,000 / 기준 8)',baseSessions:8,baseAmount:170000},{key:'m2',label:'2개월 (300,000 / 기준 16)',baseSessions:16,baseAmount:300000}],resit:[{key:'m1',label:'1개월 (165,000 / 기준 8)',baseSessions:8,baseAmount:165000},{key:'m2',label:'2개월 (290,000 / 기준 16)',baseSessions:16,baseAmount:290000}]},
+    groupA:{label:'설린 / 라일리 / 제인 / 티나 / 다이애나 / 주디',new:[{key:'m1',label:'1개월 (170,000 / 기준 8)',baseSessions:8,baseAmount:170000},{key:'m2',label:'2개월 (300,000 / 기준 16)',baseSessions:16,baseAmount:300000}],resit:[{key:'m1',label:'1개월 (165,000 / 기준 8)',baseSessions:8,baseAmount:165000},{key:'m2',label:'2개월 (290,000 / 기준 16)',baseSessions:16,baseAmount:290000}]},
     james:{label:'제임스 진짜영어',new:[{key:'w2',label:'주2회 (190,000 / 기준 8)',baseSessions:8,baseAmount:190000},{key:'w4',label:'주4회 (320,000 / 기준 16)',baseSessions:16,baseAmount:320000}],resit:[{key:'w2',label:'주2회 (185,000 / 기준 8)',baseSessions:8,baseAmount:185000},{key:'w4',label:'주4회 (310,000 / 기준 16)',baseSessions:16,baseAmount:310000}]},
     chris:{label:'크리스 미디어영어',new:[{key:'w2',label:'주2회 (180,000 / 기준 8)',baseSessions:8,baseAmount:180000},{key:'w4',label:'주4회 (310,000 / 기준 16)',baseSessions:16,baseAmount:310000}],resit:[{key:'w2',label:'주2회 (175,000 / 기준 8)',baseSessions:8,baseAmount:175000},{key:'w4',label:'주4회 (300,000 / 기준 16)',baseSessions:16,baseAmount:300000}]},
     courtney:{label:'코트니 Go-to영어',new:[{key:'m1',label:'1개월 (190,000 / 기준 8)',baseSessions:8,baseAmount:190000},{key:'m2',label:'2개월(2과목) (340,000 / 기준 16)',baseSessions:16,baseAmount:340000}],resit:[{key:'m1',label:'1개월 (185,000 / 기준 8)',baseSessions:8,baseAmount:185000},{key:'m2',label:'2개월(2과목) (330,000 / 기준 16)',baseSessions:16,baseAmount:330000}]},
@@ -1204,7 +1204,7 @@ feeEls.discOtherOn.addEventListener('change',()=>{feeEls.discOtherAmount.readOnl
 /* =========================================================
    (C) 환불 계산기(B안) — 원본 로직 100% 유지
 ========================================================= */
-const RF_PRICES={academy:{groupA:{label:'설린 / 유나 / 라일리 / 제인 / 티나 / 다이애나',new:{p8:170000,p16:300000},resit:{p8:165000,p16:290000}},james:{label:'제임스',new:{p8:190000,p16:320000},resit:{p8:185000,p16:310000}},chris:{label:'크리스',new:{p8:180000,p16:310000},resit:{p8:175000,p16:300000}},courtney:{label:'코트니',new:{p8:190000,p16:340000},resit:{p8:185000,p16:330000}}},study:{only:{label:'원어민 회화스터디',new:{p8:150000,p16:277000,p32:494000,p48:657000},resit:{p8:150000,p16:277000,p32:494000,p48:657000}}}};
+const RF_PRICES={academy:{groupA:{label:'설린 / 라일리 / 제인 / 티나 / 다이애나 / 주디',new:{p8:170000,p16:300000},resit:{p8:165000,p16:290000}},james:{label:'제임스',new:{p8:190000,p16:320000},resit:{p8:185000,p16:310000}},chris:{label:'크리스',new:{p8:180000,p16:310000},resit:{p8:175000,p16:300000}},courtney:{label:'코트니',new:{p8:190000,p16:340000},resit:{p8:185000,p16:330000}}},study:{only:{label:'원어민 회화스터디',new:{p8:150000,p16:277000,p32:494000,p48:657000},resit:{p8:150000,p16:277000,p32:494000,p48:657000}}}};
 const rfEls={cat:document.getElementById('rfCat'),group:document.getElementById('rfGroup'),payType:document.getElementById('rfPayType'),paidSessions:document.getElementById('rfPaidSessions'),usedSessions:document.getElementById('rfUsedSessions'),paidAmount:document.getElementById('rfPaidAmount'),override:document.getElementById('rfOverride'),paidAmountInput:document.getElementById('rfPaidAmountInput'),preview:document.getElementById('previewRefund')};
 function rfGroupOptions(){const cat=rfEls.cat.value;const groups=RF_PRICES[cat];rfEls.group.innerHTML='';Object.keys(groups).forEach(k=>{const opt=document.createElement('option');opt.value=k;opt.textContent=groups[k].label;rfEls.group.appendChild(opt);});}
 function calcPaidAmountFromSessions(){const cat=rfEls.cat.value;const groupKey=rfEls.group.value;const payType=rfEls.payType.value;const N=Number(rfEls.paidSessions.value||0);if(cat==='academy'){const price=RF_PRICES.academy[groupKey][payType];if(N<=8)return Math.round(price.p8*(N/8));return Math.round(price.p16*(N/16));}else{const price=RF_PRICES.study[groupKey][payType];if(N<=8)return Math.round(price.p8*(N/8));if(N<=16)return Math.round(price.p16*(N/16));if(N<=32)return Math.round(price.p32*(N/32));if(N<=48)return Math.round(price.p48*(N/48));return Math.round(price.p48*(N/48));}}
