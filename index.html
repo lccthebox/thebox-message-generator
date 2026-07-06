@@ -1067,19 +1067,35 @@ function addRow(label, el){
 function renderFields(){
   fieldsWrap.innerHTML='';
   if(msgState.type==='consult'){
-    const tmr=getTomorrowKST();
-    const m=mkInput('number',msgState.fields.consultMonth||'',{min:1});m.addEventListener('input',()=>{msgState.fields.consultMonth=m.value;renderPreview();});addRow('예약 월',m);
-    const d=mkInput('number',msgState.fields.consultDay||'',{min:1});d.addEventListener('input',()=>{msgState.fields.consultDay=d.value;renderPreview();});addRow('예약 일',d);
+    // 상담톡 날짜 피커
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const defaultConsultVal = msgState.fields.consultMonth && msgState.fields.consultDay
+      ? `${yyyy}-${String(msgState.fields.consultMonth).padStart(2,'0')}-${String(msgState.fields.consultDay).padStart(2,'0')}`
+      : `${yyyy}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.value = defaultConsultVal;
+    dateInput.style.width = '100%';
+    dateInput.addEventListener('change', () => {
+      const d = new Date(dateInput.value + 'T00:00:00');
+      if(!isNaN(d)){
+        msgState.fields.consultMonth   = String(d.getMonth()+1);
+        msgState.fields.consultDay     = String(d.getDate());
+        msgState.fields.consultWeekday = getKoreanWeekday(d);
+        const display = document.getElementById('consultWeekdayDisplay');
+        if(display) display.textContent = msgState.fields.consultWeekday + '요일';
+      }
+      renderPreview();
+    });
+    addRow('예약 날짜', dateInput);
 
     const weekRow=document.createElement('div');weekRow.className='form-row';
-    const wl=document.createElement('div');wl.className='form-label';wl.textContent='예약 요일';
-    const ww=document.createElement('div');ww.className='day-chips';
-    ['월','화','수','목','금','토','일'].forEach(wk=>{
-      const lab=document.createElement('label');lab.className='day-chip';
-      lab.innerHTML=`<input type="radio" name="consultWeekday" value="${wk}" ${msgState.fields.consultWeekday===wk?'checked':''}><span>${wk}</span>`;
-      lab.querySelector('input').addEventListener('change',()=>{msgState.fields.consultWeekday=wk;renderPreview();});
-      ww.appendChild(lab);
-    });
+    const wl=document.createElement('div');wl.className='form-label';wl.textContent='요일 (자동)';
+    const ww=document.createElement('div');
+    ww.style.cssText='padding:9px 12px;border-radius:8px;background:var(--bg);border:1.5px solid var(--border);font-size:13px;font-weight:700;color:var(--text);';
+    ww.id='consultWeekdayDisplay';
+    ww.textContent=msgState.fields.consultWeekday ? msgState.fields.consultWeekday+'요일' : '—';
     weekRow.appendChild(wl);weekRow.appendChild(ww);fieldsWrap.appendChild(weekRow);
 
     const timeRow=document.createElement('div');timeRow.className='form-row';
@@ -1096,8 +1112,28 @@ function renderFields(){
   }
   if(msgState.type==='cert'||msgState.type==='nativeInquiry'){const div=document.createElement('div');div.style.color='var(--text-3)';div.style.fontSize='13px';div.textContent='입력할 항목이 없습니다.';fieldsWrap.appendChild(div);return;}
 
-  if(fieldVisible('month')){const i=mkInput('number',msgState.fields.month||'',{min:1});i.addEventListener('input',()=>{msgState.fields.month=i.value;renderPreview();});addRow('시작 월',i);}
-  if(fieldVisible('day')){const i=mkInput('number',msgState.fields.day||'',{min:1});i.addEventListener('input',()=>{msgState.fields.day=i.value;renderPreview();});addRow('시작 일',i);}
+  if(fieldVisible('month')){
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth()+1).padStart(2,'0');
+    const dd = String(today.getDate()).padStart(2,'0');
+    const defaultVal = msgState.fields.month && msgState.fields.day
+      ? `${yyyy}-${String(msgState.fields.month).padStart(2,'0')}-${String(msgState.fields.day).padStart(2,'0')}`
+      : `${yyyy}-${mm}-${dd}`;
+    const i = document.createElement('input');
+    i.type = 'date';
+    i.value = defaultVal;
+    i.style.width = '100%';
+    i.addEventListener('change', () => {
+      const d = new Date(i.value + 'T00:00:00');
+      if(!isNaN(d)){
+        msgState.fields.month = String(d.getMonth()+1);
+        msgState.fields.day   = String(d.getDate());
+      }
+      renderPreview();
+    });
+    addRow('시작 날짜', i);
+  }
   if(fieldVisible('time')){
     let opts=msgState.type==='studyStart'?TIME_OPTIONS.study:TIME_OPTIONS.academyCommon;
     const s=mkSelect(opts,msgState.fields.time||opts[0]);s.addEventListener('change',()=>{msgState.fields.time=s.value;renderPreview();});addRow('시간',s);
