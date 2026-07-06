@@ -969,11 +969,12 @@ const BLOCKS = {
   nativeInquiryFixed:`Hello, thank you for reaching out to us!\n\nWe're a language exchange community.\nWe don't just do language exchange,  we also have parties and various activities you can join 🙂\n\nTo check your preferred schedule and level, could you please fill out the short form in the link below?\nWe have a manager who specializes in Korean classes, and that manager will contact you directly after reviewing your info.\n\nhttps://lccthebox.github.io/community\n`,
 };
 
+const _today = new Date();
 const msgState = {
   type: 'studyStart',
   sections: new Set(DEFAULT_SECTIONS_BY_TYPE.studyStart),
   fields: {
-    month:'1', day:'10', time:TIME_OPTIONS.study[0],
+    month: String(_today.getMonth()+1), day: String(_today.getDate()), time:TIME_OPTIONS.study[0],
     level:STUDY_LEVELS[0],
     amountStudy:DEFAULT_PRICE_TEXT.study['원어민 회화스터디'],
     course:ACADEMY_COURSES[0],
@@ -1070,9 +1071,7 @@ function renderFields(){
     // 상담톡 날짜 피커
     const today = new Date();
     const yyyy = today.getFullYear();
-    const defaultConsultVal = msgState.fields.consultMonth && msgState.fields.consultDay
-      ? `${yyyy}-${String(msgState.fields.consultMonth).padStart(2,'0')}-${String(msgState.fields.consultDay).padStart(2,'0')}`
-      : `${yyyy}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    const defaultConsultVal = `${yyyy}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
     const dateInput = document.createElement('input');
     dateInput.type = 'date';
     dateInput.value = defaultConsultVal;
@@ -1117,9 +1116,7 @@ function renderFields(){
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth()+1).padStart(2,'0');
     const dd = String(today.getDate()).padStart(2,'0');
-    const defaultVal = msgState.fields.month && msgState.fields.day
-      ? `${yyyy}-${String(msgState.fields.month).padStart(2,'0')}-${String(msgState.fields.day).padStart(2,'0')}`
-      : `${yyyy}-${mm}-${dd}`;
+    const defaultVal = `${yyyy}-${mm}-${dd}`;
     const i = document.createElement('input');
     i.type = 'date';
     i.value = defaultVal;
