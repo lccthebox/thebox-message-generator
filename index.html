@@ -1076,8 +1076,10 @@ function renderFields(){
     dateInput.type = 'date';
     dateInput.value = defaultConsultVal;
     dateInput.style.width = '100%';
-    dateInput.addEventListener('change', () => {
-      const parts = dateInput.value.split('-');
+
+    // 렌더링 시 피커 value 기준으로 msgState 즉시 동기화
+    const syncConsultDate = (val) => {
+      const parts = val.split('-');
       if(parts.length===3){
         const d = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
         msgState.fields.consultMonth   = String(d.getMonth()+1);
@@ -1086,6 +1088,11 @@ function renderFields(){
         const display = document.getElementById('consultWeekdayDisplay');
         if(display) display.textContent = msgState.fields.consultWeekday + '요일';
       }
+    };
+    syncConsultDate(defaultConsultVal);
+
+    dateInput.addEventListener('change', () => {
+      syncConsultDate(dateInput.value);
       renderPreview();
     });
     addRow('예약 날짜', dateInput);
@@ -1122,13 +1129,20 @@ function renderFields(){
     i.type = 'date';
     i.value = defaultVal;
     i.style.width = '100%';
-    i.addEventListener('change', () => {
-      const parts = i.value.split('-');
+
+    // 렌더링 시 즉시 동기화
+    const syncStartDate = (val) => {
+      const parts = val.split('-');
       if(parts.length===3){
         const d = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
         msgState.fields.month = String(d.getMonth()+1);
         msgState.fields.day   = String(d.getDate());
       }
+    };
+    syncStartDate(defaultVal);
+
+    i.addEventListener('change', () => {
+      syncStartDate(i.value);
       renderPreview();
     });
     addRow('시작 날짜', i);
