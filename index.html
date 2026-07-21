@@ -1075,7 +1075,18 @@ const LOCATIONS = {
   '코트니 Go-to영어': ['8층 807호'],
   '주디 Judy영어':    ['8층 803호'],
   '짜이뤼 중국어':    ['7층 705호'],
-  '[특강]': ['7층 701호','7층 703호','7층 704호','7층 705호','8층 801호','8층 803호','8층 805호','8층 806호','8층 807호'],
+  '[특강]': [
+    '설린 선생님 — 7층 704호',
+    '라일리 선생님 — 8층 801호',
+    '제인 선생님 — 7층 701호',
+    '티나 선생님 — 8층 805호',
+    '다이애나 선생님 — 7층 704호',
+    '제임스 선생님 — 7층 703호',
+    '크리스 선생님 — 8층 806호',
+    '코트니 선생님 — 8층 807호',
+    '주디 선생님 — 8층 803호',
+    '짜이뤼 선생님 — 7층 705호',
+  ],
 };
 const TIME_OPTIONS = {
   study: ['오전 10시','오전 10시 30분','오전 11시','오전 11시 30분','오후 12시','오후 1시','오후 1시 30분','오후 6시 30분','오후 6시 50분','오후 8시 30분'],
@@ -1671,8 +1682,8 @@ function renderFields(){
       // 힌트: 기준회차 / 기준금액
       const wrap = document.createElement('div');
       wrap.style.cssText = 'display:flex;gap:8px;align-items:center;';
-      const hint = document.createElement('span');
-      hint.style.cssText = 'font-size:12px;color:var(--text-3);white-space:nowrap;';
+      const hint = document.createElement('div');
+      hint.style.cssText = 'font-size:11px;color:var(--text-3);padding:2px 0 4px;word-break:keep-all;line-height:1.5;';
       const isMixPkg = ['ft2','ft3','ft4'].includes(curPkg.key);
       const isCourtney0 = isMixPkg && msgState.fields.course === '코트니 Go-to영어';
       const extraAcad = (isCourtney0 && (part.id==='acad')) ? (FT_COURTNEY_EXTRA[part.baseN]||0) : 0;
@@ -1701,7 +1712,15 @@ function renderFields(){
         ? `${moneyFmt(nListAmt0)}원 / 기준 ${part.baseN}회 ${moneyFmt(effListPrice0)}원 - ${discParts0.join(', ')} = ${moneyFmt(finalAmt0)}원`
         : `${moneyFmt(nListAmt0)}원 / 기준 ${part.baseN}회 ${moneyFmt(effListPrice0)}원`;
       wrap.appendChild(inp);
-      wrap.appendChild(hint);
+      // 힌트는 row 밖 별도 줄로
+
+      const row = document.createElement('div');
+      row.className = 'form-row';
+      const lbl = part.id==='acad'||part.id==='kor' ? part.name : part.name;
+      const l = document.createElement('div'); l.className='form-label'; l.textContent=lbl;
+      row.appendChild(l); row.appendChild(wrap);
+      fieldsWrap.appendChild(row);
+      fieldsWrap.appendChild(hint);
 
       inp.addEventListener('input', ()=>{
         msgState.fields.ftSessions[part.id] = Number(inp.value)||0;
@@ -1736,13 +1755,6 @@ function renderFields(){
           : `${moneyFmt(nAmt)}원 / 기준 ${part.baseN}회 ${moneyFmt(bListPrice)}원`;
         renderPreview();
       });
-
-      const lbl = part.id==='acad'||part.id==='kor' ? part.name : part.name;
-      const row = document.createElement('div');
-      row.className = 'form-row';
-      const l = document.createElement('div'); l.className='form-label'; l.textContent=lbl;
-      row.appendChild(l); row.appendChild(wrap);
-      fieldsWrap.appendChild(row);
     });
 
     // 계산된 금액 표시
