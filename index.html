@@ -1731,7 +1731,7 @@ function renderFields(){
           const amtDisplay = document.getElementById('ftAmountDisplay');
           if(amtDisplay) amtDisplay.value = msgState.fields.ftAmount;
         }
-        renderPreview();
+        renderFields(); renderPreview();
       });
       return lab;
     };
@@ -1771,7 +1771,7 @@ function renderFields(){
           const amtDisplay = document.getElementById('ftAmountDisplay');
           if(amtDisplay) amtDisplay.value = msgState.fields.ftAmount;
         }
-        renderPreview();
+        renderFields(); renderPreview();
       });
       addRow('기타할인 금액', oi);
     }
