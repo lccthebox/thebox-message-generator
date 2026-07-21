@@ -1065,28 +1065,17 @@ const ACADEMY_COURSES = [
 ];
 const ACADEMY_COURSES_FT = ACADEMY_COURSES.filter(c => c !== '제임스 진짜영어' && c !== '크리스 미디어영어' && c !== '[특강]');
 const LOCATIONS = {
-  '설린 도전영어':    ['설린 선생님 (7층 704호)'],
-  '라일리 Right 영어':['라일리 선생님 (8층 801호)'],
-  '제인 제일영어':    ['제인 선생님 (7층 701호)'],
-  '티나 트렌디영어':  ['티나 선생님 (8층 805호)'],
-  '다이애나 바로영어':['다이애나 선생님 (7층 704호)'],
-  '제임스 진짜영어':  ['제임스 선생님 (7층 703호)'],
-  '크리스 미디어영어':['크리스 선생님 (8층 806호)'],
-  '코트니 Go-to영어': ['코트니 선생님 (8층 807호)'],
-  '주디 Judy영어':    ['주디 선생님 (8층 803호)'],
-  '짜이뤼 중국어':    ['짜이뤼 선생님 (7층 705호)'],
-  '[특강]': [
-    '설린 선생님 (7층 704호)',
-    '라일리 선생님 (8층 801호)',
-    '제인 선생님 (7층 701호)',
-    '티나 선생님 (8층 805호)',
-    '다이애나 선생님 (7층 704호)',
-    '제임스 선생님 (7층 703호)',
-    '크리스 선생님 (8층 806호)',
-    '코트니 선생님 (8층 807호)',
-    '주디 선생님 (8층 803호)',
-    '짜이뤼 선생님 (7층 705호)',
-  ],
+  '설린 도전영어':    ['7층 704호'],
+  '라일리 Right 영어':['8층 801호'],
+  '제인 제일영어':    ['7층 701호'],
+  '티나 트렌디영어':  ['8층 805호'],
+  '다이애나 바로영어':['7층 704호'],
+  '제임스 진짜영어':  ['7층 703호'],
+  '크리스 미디어영어':['8층 806호'],
+  '코트니 Go-to영어': ['8층 807호'],
+  '주디 Judy영어':    ['8층 803호'],
+  '짜이뤼 중국어':    ['7층 705호'],
+  '[특강]': ['7층 701호','7층 703호','7층 704호','7층 705호','8층 801호','8층 803호','8층 805호','8층 806호','8층 807호'],
 };
 const TIME_OPTIONS = {
   study: ['오전 10시','오전 10시 30분','오전 11시','오전 11시 30분','오후 12시','오후 1시','오후 1시 30분','오후 6시 30분','오후 6시 50분','오후 8시 30분'],
@@ -1246,7 +1235,7 @@ const msgState = {
     consultMonth:String(_today.getMonth()+1), consultDay:String(_today.getDate()), consultWeekday:['일','월','화','수','목','금','토'][_today.getDay()],
     consultAmPm:'오전', consultHour:'10', consultMin:'00', consultTimeOther:'',
     ftPkgKey:'ft2', ftAmount:'418,500', ftResit: false,
-    spUnitPrice:0, spTotalN:8, spPaidN:8, // [특강] 단가/전체횟수/결제횟수
+    spUnitPrice:0, spTotalN:8, spPaidN:8, spName:'', // [특강] 단가/전체횟수/결제횟수/특강명
     discFriend: false, discReview: false, discOther: false, discOtherAmt: 0, discAuditExclude: false,
     extendPrice:DEFAULT_PRICE_TEXT.studyExtend['원어민 회화스터디'],
     extendPlan:'16', extendCustomN:16,
@@ -1526,12 +1515,24 @@ function renderFields(){
       addRow('강의실', i);
     }
   }
-  // ── [특강] 전용: 단가/전체횟수/결제횟수 입력 ──
+  // ── [특강] 전용: 특강명/단가/전체횟수/결제횟수 입력 ──
   if(fieldVisible('spUnitPrice')){
-    // 단가
-    const uInp = mkInput('number', msgState.fields.spUnitPrice||0, {min:0});
+    // 특강명
+    const nmInp = mkInput('text', msgState.fields.spName||'');
+    nmInp.placeholder = '예: 스피킹 특강';
+    nmInp.addEventListener('input',()=>{ msgState.fields.spName=nmInp.value; renderPreview(); });
+    addRow('특강명', nmInp);
+
+    // 회당 수강금액
+    const uInp = mkInput('number', msgState.fields.spUnitPrice||'', {min:0});
     uInp.placeholder = '예: 30000';
-    uInp.addEventListener('input',()=>{ msgState.fields.spUnitPrice=Number(uInp.value)||0; renderPreview(); });
+    uInp.addEventListener('input',()=>{
+      msgState.fields.spUnitPrice=Number(uInp.value)||0;
+      // 힌트 실시간 업데이트
+      const a = Math.round(msgState.fields.spUnitPrice*(msgState.fields.spPaidN||0));
+      if(spHint) spHint.textContent=`→ 결제금액: ${moneyFmt(a)}원 (${moneyFmt(msgState.fields.spUnitPrice)}원 × ${msgState.fields.spPaidN||0}회)`;
+      renderPreview();
+    });
     addRow('회당 수강금액', uInp);
 
     // 전체횟수 / 결제횟수 한 줄
@@ -1544,17 +1545,24 @@ function renderFields(){
     const span1 = document.createElement('span'); span1.style.cssText='font-size:12px;color:var(--text-3);white-space:nowrap;'; span1.textContent='회 전체 /';
     const paidInp = document.createElement('input'); paidInp.type='number'; paidInp.min=1; paidInp.value=msgState.fields.spPaidN||8;
     paidInp.style.cssText='width:70px;font-size:16px;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);font-family:inherit;';
-    paidInp.addEventListener('input',()=>{ msgState.fields.spPaidN=Number(paidInp.value)||1; renderPreview(); });
+    paidInp.addEventListener('input',()=>{
+      msgState.fields.spPaidN=Number(paidInp.value)||1;
+      const a = Math.round((msgState.fields.spUnitPrice||0)*msgState.fields.spPaidN);
+      if(spHint) spHint.textContent=`→ 결제금액: ${moneyFmt(a)}원 (${moneyFmt(msgState.fields.spUnitPrice||0)}원 × ${msgState.fields.spPaidN}회)`;
+      renderPreview();
+    });
     const span2 = document.createElement('span'); span2.style.cssText='font-size:12px;color:var(--text-3);white-space:nowrap;'; span2.textContent='회 결제';
     nw.appendChild(totInp); nw.appendChild(span1); nw.appendChild(paidInp); nw.appendChild(span2);
     nRow.appendChild(nl); nRow.appendChild(nw); fieldsWrap.appendChild(nRow);
 
-    // 자동 계산 금액 힌트
-    const amt = Math.round((msgState.fields.spUnitPrice||0) * (msgState.fields.spPaidN||0));
-    const hint = document.createElement('div');
-    hint.style.cssText='font-size:12px;color:var(--text-3);padding:4px 0;';
-    hint.textContent = `→ 결제금액: ${moneyFmt(amt)}원 (${moneyFmt(msgState.fields.spUnitPrice||0)}원 × ${msgState.fields.spPaidN||0}회)`;
-    fieldsWrap.appendChild(hint);
+    // 힌트
+    const spHint = document.createElement('div');
+    spHint.style.cssText='font-size:12px;color:var(--text-3);padding:4px 0;';
+    const initAmt = Math.round((msgState.fields.spUnitPrice||0)*(msgState.fields.spPaidN||0));
+    spHint.textContent = initAmt > 0
+      ? `→ 결제금액: ${moneyFmt(initAmt)}원 (${moneyFmt(msgState.fields.spUnitPrice)}원 × ${msgState.fields.spPaidN}회)`
+      : `→ 회당 금액 × 결제 횟수 = 결제금액`;
+    fieldsWrap.appendChild(spHint);
   }
 
   // ── 아카데미 기준회차 / 실입력 회차 ──
@@ -1882,7 +1890,12 @@ function renderPreview(){
   }
   if(msgState.type==='academyStart'||msgState.type==='academyResit'){
     parts.push((msgState.type==='academyResit'?BLOCKS.academyResitHeader:BLOCKS.academyStartHeader).trim()+'\n');
-    if(msgState.sections.has('academyEnroll'))parts.push(applyVars(BLOCKS.academyEnrollBlock,{date,time,course:String(msgState.fields.course||'').trim(),loc:String(msgState.fields.loc||'').trim()}));
+    if(msgState.sections.has('academyEnroll')){
+      const courseName = msgState.fields.course==='[특강]' && msgState.fields.spName
+        ? `[특강] ${msgState.fields.spName}`
+        : String(msgState.fields.course||'').trim();
+      parts.push(applyVars(BLOCKS.academyEnrollBlock,{date,time,course:courseName,loc:String(msgState.fields.loc||'').trim()}));
+    }
     if(msgState.sections.has('pay')){
       const isResit2 = msgState.type==='academyResit';
       const course2 = String(msgState.fields.course||'').trim();
