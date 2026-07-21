@@ -989,7 +989,7 @@ const ACAD_PRICES = {
   zhaili:    { new8:150000, new16:280000, resit8:145000, resit16:270000 },
   james:     { new8:190000, new16:320000, resit8:185000, resit16:310000 },
   chris:     { new8:180000, new16:310000, resit8:175000, resit16:300000 },
-  courtney:  { new8:190000, new16:340000, resit8:185000, resit16:330000 },
+  courtney:  { new8:190000, new16:340000, new24:596000, resit8:185000, resit16:330000, resit24:576000 },
 };
 function getAcadPriceGroup(course) {
   if(course==='짜이뤼 중국어') return 'zhaili';
@@ -1002,8 +1002,11 @@ function calcAcadMsgAmount(course, isResit, baseN, inputN, discFriend, discRevie
   const grp = ACAD_PRICES[getAcadPriceGroup(course)];
   const base8  = isResit ? grp.resit8  : grp.new8;
   const base16 = isResit ? grp.resit16 : grp.new16;
-  const basePrice = baseN <= 8 ? base8 : base16;
-  const baseN2 = baseN <= 8 ? 8 : 16;
+  const base24 = isResit ? (grp.resit24||grp.resit16) : (grp.new24||grp.new16);
+  let basePrice, baseN2;
+  if(baseN <= 8)       { basePrice = base8;  baseN2 = 8; }
+  else if(baseN <= 16) { basePrice = base16; baseN2 = 16; }
+  else                 { basePrice = base24; baseN2 = 24; }
   const listAmt = Math.round(basePrice * inputN / baseN2);
   let disc = 0;
   if(discFriend) disc += 10000;
@@ -1116,7 +1119,7 @@ const DEFAULT_PRICE_TEXT = {
     '다이애나 바로영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
     '제임스 진짜영어': '1개월(8회) - 19만원 / 2개월(16회) - 32만원',
     '크리스 미디어영어': '1개월(8회) - 18만원 / 2개월(16회) - 31만원',
-    '코트니 Go-to영어': '1개월(8회) - 19만원 / 2개월(16회) - 34만원',
+    '코트니 Go-to영어': '1개월(8회) - 19만원 / 2개월(16회) - 34만원 / 4달(24회) - 596,000원',
     '주디 Judy영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
     '짜이뤼 중국어': '1개월(8회) - 15만원 / 2개월(16회) - 28만원',
     '[특강]': '',
@@ -1129,7 +1132,7 @@ const DEFAULT_PRICE_TEXT = {
     '다이애나 바로영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
     '제임스 진짜영어': '1개월(8회) - 18.5만원 / 2개월(16회) - 31만원',
     '크리스 미디어영어': '1개월(8회) - 17.5만원 / 2개월(16회) - 30만원',
-    '코트니 Go-to영어': '1개월(8회) - 18.5만원 / 2개월(16회) - 33만원',
+    '코트니 Go-to영어': '1개월(8회) - 18.5만원 / 2개월(16회) - 33만원 / 4달(24회) - 576,000원',
     '주디 Judy영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
     '짜이뤼 중국어': '1개월(8회) - 14.5만원 / 2개월(16회) - 27만원',
     '[특강]': '',
@@ -1591,7 +1594,9 @@ function renderFields(){
     const cl = document.createElement('div'); cl.className='form-label'; cl.textContent='수강 기준 / 회차';
     const cw = document.createElement('div'); cw.style.cssText='display:flex;gap:8px;align-items:center;';
     const acadSel = document.createElement('select'); acadSel.style.width='140px';
-    [['8','1달 (8회)'],['16','2달 (16회)']].forEach(([val,lbl])=>{
+    const planOptions = [['8','1달 (8회)'],['16','2달 (16회)']];
+    if(course === '코트니 Go-to영어') planOptions.push(['24','4달 (24회)']);
+    planOptions.forEach(([val,lbl])=>{
       const opt=document.createElement('option'); opt.value=val; opt.textContent=lbl;
       if(msgState.fields.acadPlan===val) opt.selected=true;
       acadSel.appendChild(opt);
@@ -2092,7 +2097,7 @@ const FEE_TABLE = {
     groupA:{label:'설린 / 라일리 / 제인 / 티나 / 다이애나 / 주디',new:[{key:'m1',label:'1개월 (170,000 / 기준 8)',baseSessions:8,baseAmount:170000},{key:'m2',label:'2개월 (300,000 / 기준 16)',baseSessions:16,baseAmount:300000}],resit:[{key:'m1',label:'1개월 (165,000 / 기준 8)',baseSessions:8,baseAmount:165000},{key:'m2',label:'2개월 (290,000 / 기준 16)',baseSessions:16,baseAmount:290000}]},
     james:{label:'제임스 진짜영어',new:[{key:'w2',label:'주2회 (190,000 / 기준 8)',baseSessions:8,baseAmount:190000},{key:'w4',label:'주4회 (320,000 / 기준 16)',baseSessions:16,baseAmount:320000}],resit:[{key:'w2',label:'주2회 (185,000 / 기준 8)',baseSessions:8,baseAmount:185000},{key:'w4',label:'주4회 (310,000 / 기준 16)',baseSessions:16,baseAmount:310000}]},
     chris:{label:'크리스 미디어영어',new:[{key:'w2',label:'주2회 (180,000 / 기준 8)',baseSessions:8,baseAmount:180000},{key:'w4',label:'주4회 (310,000 / 기준 16)',baseSessions:16,baseAmount:310000}],resit:[{key:'w2',label:'주2회 (175,000 / 기준 8)',baseSessions:8,baseAmount:175000},{key:'w4',label:'주4회 (300,000 / 기준 16)',baseSessions:16,baseAmount:300000}]},
-    courtney:{label:'코트니 Go-to영어',new:[{key:'m1',label:'1개월 (190,000 / 기준 8)',baseSessions:8,baseAmount:190000},{key:'m2',label:'2개월(2과목) (340,000 / 기준 16)',baseSessions:16,baseAmount:340000}],resit:[{key:'m1',label:'1개월 (185,000 / 기준 8)',baseSessions:8,baseAmount:185000},{key:'m2',label:'2개월(2과목) (330,000 / 기준 16)',baseSessions:16,baseAmount:330000}]},
+    courtney:{label:'코트니 Go-to영어',new:[{key:'m1',label:'1개월 (190,000 / 기준 8)',baseSessions:8,baseAmount:190000},{key:'m2',label:'2개월(2과목) (340,000 / 기준 16)',baseSessions:16,baseAmount:340000},{key:'m4',label:'4달 (596,000 / 기준 24)',baseSessions:24,baseAmount:596000}],resit:[{key:'m1',label:'1개월 (185,000 / 기준 8)',baseSessions:8,baseAmount:185000},{key:'m2',label:'2개월(2과목) (330,000 / 기준 16)',baseSessions:16,baseAmount:330000},{key:'m4',label:'4달 (576,000 / 기준 24)',baseSessions:24,baseAmount:576000}]},
     zhaili:{label:'짜이뤼 중국어',new:[{key:'m1',label:'1개월 (150,000 / 기준 8)',baseSessions:8,baseAmount:150000},{key:'m2',label:'2개월 (280,000 / 기준 16)',baseSessions:16,baseAmount:280000}],resit:[{key:'m1',label:'1개월 (145,000 / 기준 8)',baseSessions:8,baseAmount:145000},{key:'m2',label:'2개월 (270,000 / 기준 16)',baseSessions:16,baseAmount:270000}]},
   },
   study:{only:{label:'원어민 회화스터디',new:[{key:'8',label:'8회 (150,000)',baseSessions:8,baseAmount:150000},{key:'16',label:'16회 (277,000)',baseSessions:16,baseAmount:277000},{key:'32',label:'32회 (494,000)',baseSessions:32,baseAmount:494000}],resit:[{key:'8',label:'8회 (150,000)',baseSessions:8,baseAmount:150000},{key:'16',label:'16회 (277,000)',baseSessions:16,baseAmount:277000},{key:'32',label:'32회 (494,000)',baseSessions:32,baseAmount:494000}]}}
@@ -2313,7 +2318,7 @@ feeEls.discOtherOn.addEventListener('change',()=>{feeEls.discOtherAmount.readOnl
 /* =========================================================
    (C) 환불 계산기(B안) — 원본 로직 100% 유지
 ========================================================= */
-const RF_PRICES={academy:{groupA:{label:'설린 / 라일리 / 제인 / 티나 / 다이애나 / 주디',monthUnit:8,new:{p8:170000,p16:300000},resit:{p8:165000,p16:290000}},james:{label:'제임스',monthUnit:16,new:{p8:190000,p16:320000},resit:{p8:185000,p16:310000}},chris:{label:'크리스',monthUnit:16,new:{p8:180000,p16:310000},resit:{p8:175000,p16:300000}},courtney:{label:'코트니',monthUnit:8,new:{p8:190000,p16:340000},resit:{p8:185000,p16:330000}}},study:{only:{label:'원어민 회화스터디',monthUnit:null,new:{p8:150000,p16:277000,p32:494000,p48:657000},resit:{p8:150000,p16:277000,p32:494000,p48:657000}}}};
+const RF_PRICES={academy:{groupA:{label:'설린 / 라일리 / 제인 / 티나 / 다이애나 / 주디',monthUnit:8,new:{p8:170000,p16:300000},resit:{p8:165000,p16:290000}},james:{label:'제임스',monthUnit:16,new:{p8:190000,p16:320000},resit:{p8:185000,p16:310000}},chris:{label:'크리스',monthUnit:16,new:{p8:180000,p16:310000},resit:{p8:175000,p16:300000}},courtney:{label:'코트니',monthUnit:8,new:{p8:190000,p16:340000,p24:596000},resit:{p8:185000,p16:330000,p24:576000}}},study:{only:{label:'원어민 회화스터디',monthUnit:null,new:{p8:150000,p16:277000,p32:494000,p48:657000},resit:{p8:150000,p16:277000,p32:494000,p48:657000}}}};
 const rfEls={cat:document.getElementById('rfCat'),group:document.getElementById('rfGroup'),payType:document.getElementById('rfPayType'),paidSessions:document.getElementById('rfPaidSessions'),usedSessions:document.getElementById('rfUsedSessions'),paidAmount:document.getElementById('rfPaidAmount'),override:document.getElementById('rfOverride'),paidAmountInput:document.getElementById('rfPaidAmountInput'),discFriend:document.getElementById('rfDiscFriend'),discReview:document.getElementById('rfDiscReview'),preview:document.getElementById('previewRefund')};
 function rfGroupOptions(){const cat=rfEls.cat.value;if(cat==='fasttrack')return;const groups=RF_PRICES[cat];rfEls.group.innerHTML='';Object.keys(groups).forEach(k=>{const opt=document.createElement('option');opt.value=k;opt.textContent=groups[k].label;rfEls.group.appendChild(opt);});}
 function calcPaidAmountFromSessions(){const cat=rfEls.cat.value;const groupKey=rfEls.group.value;const payType=rfEls.payType.value;const N=Number(rfEls.paidSessions.value||0);if(cat==='academy'){const price=RF_PRICES.academy[groupKey][payType];if(N<=8)return Math.round(price.p8*(N/8));return Math.round(price.p16*(N/16));}else{const price=RF_PRICES.study[groupKey][payType];if(N<=8)return Math.round(price.p8*(N/8));if(N<=16)return Math.round(price.p16*(N/16));if(N<=32)return Math.round(price.p32*(N/32));if(N<=48)return Math.round(price.p48*(N/48));return Math.round(price.p48*(N/48));}}
