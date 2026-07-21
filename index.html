@@ -990,14 +990,12 @@ const ACAD_PRICES = {
   james:     { new8:190000, new16:320000, resit8:185000, resit16:310000 },
   chris:     { new8:180000, new16:310000, resit8:175000, resit16:300000 },
   courtney:  { new8:190000, new16:340000, resit8:185000, resit16:330000 },
-  tinaOpic:  { new8:235000, new16:235000, resit8:235000, resit16:235000 },
 };
 function getAcadPriceGroup(course) {
   if(course==='짜이뤼 중국어') return 'zhaili';
   if(course==='제임스 진짜영어') return 'james';
   if(course==='크리스 미디어영어') return 'chris';
   if(course==='코트니 Go-to영어') return 'courtney';
-  if(course==='티나 오픽') return 'tinaOpic';
   return 'groupA';
 }
 function calcAcadMsgAmount(course, isResit, baseN, inputN, discFriend, discReview, discOther, discAudit=false) {
@@ -1062,18 +1060,51 @@ const MSG_SECTIONS = [
 
 const ACADEMY_COURSES = [
   '설린 도전영어','라일리 Right 영어','제인 제일영어','티나 트렌디영어','다이애나 바로영어',
-  '티나 오픽','제임스 진짜영어','크리스 미디어영어','코트니 Go-to영어','주디 Judy영어','짜이뤼 중국어',
+  '제임스 진짜영어','크리스 미디어영어','코트니 Go-to영어','주디 Judy영어','짜이뤼 중국어',
+  '[특강]',
 ];
-const ACADEMY_COURSES_FT = ACADEMY_COURSES.filter(c => c !== '제임스 진짜영어' && c !== '크리스 미디어영어');
+const ACADEMY_COURSES_FT = ACADEMY_COURSES.filter(c => c !== '제임스 진짜영어' && c !== '크리스 미디어영어' && c !== '[특강]');
 const LOCATIONS = {
-  '설린 도전영어': ['7층 704호'],'라일리 Right 영어': ['8층 801호'],
-  '제인 제일영어': ['7층 701호'],'티나 트렌디영어': ['8층 805호'],'다이애나 바로영어': ['7층 704호'],
-  '티나 오픽': ['8층 805호'],'제임스 진짜영어': ['7층 703호'],'크리스 미디어영어': ['8층 806호'],
-  '코트니 Go-to영어': ['8층 807호'],'주디 Judy영어': ['8층 803호'],'짜이뤼 중국어': ['7층 705호'],
+  '설린 도전영어':    ['설린 선생님 (7층 704호)'],
+  '라일리 Right 영어':['라일리 선생님 (8층 801호)'],
+  '제인 제일영어':    ['제인 선생님 (7층 701호)'],
+  '티나 트렌디영어':  ['티나 선생님 (8층 805호)'],
+  '다이애나 바로영어':['다이애나 선생님 (7층 704호)'],
+  '제임스 진짜영어':  ['제임스 선생님 (7층 703호)'],
+  '크리스 미디어영어':['크리스 선생님 (8층 806호)'],
+  '코트니 Go-to영어': ['코트니 선생님 (8층 807호)'],
+  '주디 Judy영어':    ['주디 선생님 (8층 803호)'],
+  '짜이뤼 중국어':    ['짜이뤼 선생님 (7층 705호)'],
+  '[특강]': [
+    '설린 선생님 (7층 704호)',
+    '라일리 선생님 (8층 801호)',
+    '제인 선생님 (7층 701호)',
+    '티나 선생님 (8층 805호)',
+    '다이애나 선생님 (7층 704호)',
+    '제임스 선생님 (7층 703호)',
+    '크리스 선생님 (8층 806호)',
+    '코트니 선생님 (8층 807호)',
+    '주디 선생님 (8층 803호)',
+    '짜이뤼 선생님 (7층 705호)',
+  ],
 };
 const TIME_OPTIONS = {
-  study: ['오전 11시','오후 8시','오후 1시'],
-  academyCommon: ['오전 9시 30분','오전 10시','오전 10시 30분','오전 11시 30분','오전 11시 45분','오후 12시','오후 1시','오후 1시 30분','오후 6시 30분','오후 6시 50분','오후 8시 30분','오후 8시 45분']
+  study: ['오전 10시','오전 10시 30분','오전 11시','오전 11시 30분','오후 12시','오후 1시','오후 1시 30분','오후 6시 30분','오후 6시 50분','오후 8시 30분'],
+  academyCommon: ['오전 9시 30분','오전 10시','오전 10시 30분','오전 11시 30분','오전 11시 45분','오후 12시','오후 1시','오후 1시 30분','오후 2시 40분','오후 3시','오후 6시 30분','오후 6시 50분','오후 8시 30분','오후 8시 45분'],
+};
+// 강좌별 전용 시간 옵션 (없으면 직접 입력)
+const COURSE_TIMES = {
+  '설린 도전영어':    ['오전 10시 30분','오후 12시','오후 6시 50분','오후 8시 30분'],
+  '제인 제일영어':    ['오전 10시 30분','오후 12시','오후 6시 50분','오후 8시 30분'],
+  '티나 트렌디영어':  ['오전 10시 30분','오후 12시','오후 6시 50분','오후 8시 30분'],
+  '코트니 Go-to영어': ['오전 10시 30분','오후 12시','오후 6시 50분','오후 8시 30분'],
+  '라일리 Right 영어':['오전 10시','오전 11시 30분','오후 1시 30분','오후 3시','오후 6시 50분','오후 8시 30분'],
+  '제임스 진짜영어':  ['오전 11시 45분','오후 8시 45분'],
+  '크리스 미디어영어':['오전 9시 30분','오후 6시 30분','오후 8시 30분'],
+  '주디 Judy영어':    ['오전 10시 30분','오전 11시 30분'],
+  '다이애나 바로영어':['오전 11시 30분','오후 1시','오후 2시 40분'],
+  '짜이뤼 중국어':    [], // 직접 입력
+  '[특강]':           [], // 직접 입력
 };
 const STUDY_LEVELS = ['Beginner','Pre-intermediate','Intermediate','Upper intermediate','Advanced Low','Advanced'];
 const DEFAULT_PRICE_TEXT = {
@@ -1083,12 +1114,12 @@ const DEFAULT_PRICE_TEXT = {
     '제인 제일영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
     '티나 트렌디영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
     '다이애나 바로영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
-    '티나 오픽': '1개월(8회, ih보장) - 23.5만원',
     '제임스 진짜영어': '1개월(8회) - 19만원 / 2개월(16회) - 32만원',
     '크리스 미디어영어': '1개월(8회) - 18만원 / 2개월(16회) - 31만원',
     '코트니 Go-to영어': '1개월(8회) - 19만원 / 2개월(16회) - 34만원',
     '주디 Judy영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
     '짜이뤼 중국어': '1개월(8회) - 15만원 / 2개월(16회) - 28만원',
+    '[특강]': '',
   },
   academyResit: {
     '설린 도전영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
@@ -1096,12 +1127,12 @@ const DEFAULT_PRICE_TEXT = {
     '제인 제일영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
     '티나 트렌디영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
     '다이애나 바로영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
-    '티나 오픽': '8회(1개월) 23.5만원',
     '제임스 진짜영어': '1개월(8회) - 18.5만원 / 2개월(16회) - 31만원',
     '크리스 미디어영어': '1개월(8회) - 17.5만원 / 2개월(16회) - 30만원',
     '코트니 Go-to영어': '1개월(8회) - 18.5만원 / 2개월(16회) - 33만원',
     '주디 Judy영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
     '짜이뤼 중국어': '1개월(8회) - 14.5만원 / 2개월(16회) - 27만원',
+    '[특강]': '',
   },
   study: {
     '원어민 회화스터디':
@@ -1215,6 +1246,7 @@ const msgState = {
     consultMonth:String(_today.getMonth()+1), consultDay:String(_today.getDate()), consultWeekday:['일','월','화','수','목','금','토'][_today.getDay()],
     consultAmPm:'오전', consultHour:'10', consultMin:'00', consultTimeOther:'',
     ftPkgKey:'ft2', ftAmount:'418,500', ftResit: false,
+    spUnitPrice:0, spTotalN:8, spPaidN:8, // [특강] 단가/전체횟수/결제횟수
     discFriend: false, discReview: false, discOther: false, discOtherAmt: 0, discAuditExclude: false,
     extendPrice:DEFAULT_PRICE_TEXT.studyExtend['원어민 회화스터디'],
     extendPlan:'16', extendCustomN:16,
@@ -1242,8 +1274,8 @@ function renderTypeChips(){
       msgState.sections = new Set(DEFAULT_SECTIONS_BY_TYPE[msgState.type]||[]);
       if(msgState.type==='consult'){const tmr=getTomorrowKST();msgState.fields.consultMonth=String(tmr.getMonth()+1);msgState.fields.consultDay=String(tmr.getDate());msgState.fields.consultWeekday=getKoreanWeekday(tmr);msgState.fields.consultAmPm='오전';msgState.fields.consultHour='10';msgState.fields.consultMin='00';msgState.fields.consultTimeOther='';}
       if(msgState.type==='studyStart'){msgState.fields.time=TIME_OPTIONS.study[0];msgState.fields.level=STUDY_LEVELS[0];msgState.fields.amountStudy=DEFAULT_PRICE_TEXT.study['원어민 회화스터디'];}
-      if(msgState.type==='academyStart'||msgState.type==='academyResit'){const first=ACADEMY_COURSES[0];msgState.fields.course=first;msgState.fields.time=TIME_OPTIONS.academyCommon[0];msgState.fields.loc=(LOCATIONS[first]||[''])[0];msgState.fields.amountAcademy=(msgState.type==='academyResit')?(DEFAULT_PRICE_TEXT.academyResit[first]||''):(DEFAULT_PRICE_TEXT.academy[first]||'');}
-      if(msgState.type==='audit'){const c=msgState.fields.course||ACADEMY_COURSES[0];msgState.fields.course=c;msgState.fields.loc=(LOCATIONS[c]||[''])[0];msgState.fields.time=TIME_OPTIONS.academyCommon[0];msgState.fields.auditFeeStatus='paid';}
+      if(msgState.type==='academyStart'||msgState.type==='academyResit'){const first=ACADEMY_COURSES[0];msgState.fields.course=first;const ct=COURSE_TIMES[first];msgState.fields.time=(ct&&ct.length>0)?ct[0]:'';msgState.fields.loc=(LOCATIONS[first]||[''])[0];msgState.fields.amountAcademy=(msgState.type==='academyResit')?(DEFAULT_PRICE_TEXT.academyResit[first]||''):(DEFAULT_PRICE_TEXT.academy[first]||'');}
+      if(msgState.type==='audit'){const c=msgState.fields.course||ACADEMY_COURSES[0];msgState.fields.course=c;msgState.fields.loc=(LOCATIONS[c]||[''])[0];const ct2=COURSE_TIMES[c];msgState.fields.time=(ct2&&ct2.length>0)?ct2[0]:'';msgState.fields.auditFeeStatus='paid';}
       if(msgState.type==='fasttrack'){
         msgState.fields.course=ACADEMY_COURSES_FT[0];
         msgState.fields.loc=(LOCATIONS[ACADEMY_COURSES_FT[0]]||[''])[0];
@@ -1287,7 +1319,12 @@ function fieldVisible(fieldKey){
   if(t==='cert'||t==='nativeInquiry')return false;
   if(t==='audit'){if(msgState.sections.has('auditInfo')&&['month','day','time','course','loc'].includes(fieldKey))return true;if(fieldKey==='auditFeeStatus')return msgState.sections.has('auditFee');return false;}
   if(t==='studyStart'){if(msgState.sections.has('studyEnroll')&&['month','day','time','level'].includes(fieldKey))return true;if(['studyPlan','studyCustomN'].includes(fieldKey))return msgState.sections.has('pay');return false;}
-  if(t==='academyStart'||t==='academyResit'){if(msgState.sections.has('academyEnroll')&&['month','day','time','course','loc'].includes(fieldKey))return true;if(['acadPlan','acadCustomN'].includes(fieldKey))return msgState.sections.has('pay');return false;}
+  if(t==='academyStart'||t==='academyResit'){
+    if(msgState.sections.has('academyEnroll')&&['month','day','time','course','loc'].includes(fieldKey))return true;
+    if(['acadPlan','acadCustomN'].includes(fieldKey)&&msgState.fields.course!=='[특강]')return msgState.sections.has('pay');
+    if(['spUnitPrice','spTotalN','spPaidN'].includes(fieldKey)&&msgState.fields.course==='[특강]')return msgState.sections.has('pay');
+    return false;
+  }
   if(t==='fasttrack'){
     if(msgState.sections.has('ftEnroll')&&['month','day','time','course','loc'].includes(fieldKey))return true;
     if(fieldKey==='ftPkgKey'||fieldKey==='ftAmount')return msgState.sections.has('pay');
@@ -1396,8 +1433,30 @@ function renderFields(){
     addRow('시작 날짜', i);
   }
   if(fieldVisible('time')){
-    let opts=msgState.type==='studyStart'?TIME_OPTIONS.study:TIME_OPTIONS.academyCommon;
-    const s=mkSelect(opts,msgState.fields.time||opts[0]);s.addEventListener('change',()=>{msgState.fields.time=s.value;renderPreview();});addRow('시간',s);
+    const isAcadType = ['academyStart','academyResit','audit','fasttrack'].includes(msgState.type);
+    if(isAcadType){
+      const course = msgState.fields.course || '';
+      const courseTimes = COURSE_TIMES[course];
+      if(courseTimes && courseTimes.length > 0){
+        // 강좌별 시간 드롭다운
+        const curTime = (courseTimes.includes(msgState.fields.time)) ? msgState.fields.time : courseTimes[0];
+        msgState.fields.time = curTime;
+        const s = mkSelect(courseTimes, curTime);
+        s.addEventListener('change',()=>{ msgState.fields.time=s.value; renderPreview(); });
+        addRow('시간', s);
+      } else {
+        // 짜이뤼 등 직접 입력
+        const i = mkInput('text', msgState.fields.time||'');
+        i.placeholder = '예: 오후 2시';
+        i.addEventListener('input',()=>{ msgState.fields.time=i.value; renderPreview(); });
+        addRow('시간', i);
+      }
+    } else {
+      const opts = TIME_OPTIONS.study;
+      const s = mkSelect(opts, msgState.fields.time||opts[0]);
+      s.addEventListener('change',()=>{ msgState.fields.time=s.value; renderPreview(); });
+      addRow('시간', s);
+    }
   }
   if(fieldVisible('auditFeeStatus')){
     const wrap=document.createElement('div');wrap.className='inline-chips';
@@ -1442,13 +1501,62 @@ function renderFields(){
     const curCourse = courseList.includes(msgState.fields.course) ? msgState.fields.course : courseList[0];
     const s=mkSelect(courseList, curCourse);
     s.addEventListener('change',()=>{
-      msgState.fields.course=s.value;msgState.fields.loc=(LOCATIONS[s.value]||[''])[0];
+      msgState.fields.course=s.value;
+      msgState.fields.loc=(LOCATIONS[s.value]||[])[0]||'';
+      // 강좌별 시간 첫 번째 옵션으로 초기화
+      const ct = COURSE_TIMES[s.value];
+      msgState.fields.time = (ct && ct.length>0) ? ct[0] : '';
       msgState.fields.amountAcademy=(msgState.type==='academyResit')?(DEFAULT_PRICE_TEXT.academyResit[s.value]||''):(DEFAULT_PRICE_TEXT.academy[s.value]||'');
       renderFields();renderPreview();
     });
     addRow('강좌명',s);
   }
-  if(fieldVisible('loc')){const locList=LOCATIONS[msgState.fields.course]||[''];const s=mkSelect(locList,msgState.fields.loc||locList[0]);s.addEventListener('change',()=>{msgState.fields.loc=s.value;renderPreview();});addRow('강의실',s);}
+  if(fieldVisible('loc')){
+    const locList = LOCATIONS[msgState.fields.course] || [];
+    if(locList.length > 0){
+      const curLoc = locList.includes(msgState.fields.loc) ? msgState.fields.loc : locList[0];
+      msgState.fields.loc = curLoc;
+      const s = mkSelect(locList, curLoc);
+      s.addEventListener('change',()=>{ msgState.fields.loc=s.value; renderPreview(); });
+      addRow('강의실', s);
+    } else {
+      const i = mkInput('text', msgState.fields.loc||'');
+      i.placeholder = '예: 7층 701호';
+      i.addEventListener('input',()=>{ msgState.fields.loc=i.value; renderPreview(); });
+      addRow('강의실', i);
+    }
+  }
+  // ── [특강] 전용: 단가/전체횟수/결제횟수 입력 ──
+  if(fieldVisible('spUnitPrice')){
+    // 단가
+    const uInp = mkInput('number', msgState.fields.spUnitPrice||0, {min:0});
+    uInp.placeholder = '예: 30000';
+    uInp.addEventListener('input',()=>{ msgState.fields.spUnitPrice=Number(uInp.value)||0; renderPreview(); });
+    addRow('회당 수강금액', uInp);
+
+    // 전체횟수 / 결제횟수 한 줄
+    const nRow = document.createElement('div'); nRow.className='form-row';
+    const nl = document.createElement('div'); nl.className='form-label'; nl.textContent='전체 / 결제 횟수';
+    const nw = document.createElement('div'); nw.style.cssText='display:flex;gap:8px;align-items:center;';
+    const totInp = document.createElement('input'); totInp.type='number'; totInp.min=1; totInp.value=msgState.fields.spTotalN||8;
+    totInp.style.cssText='width:70px;font-size:16px;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);font-family:inherit;';
+    totInp.addEventListener('input',()=>{ msgState.fields.spTotalN=Number(totInp.value)||1; renderPreview(); });
+    const span1 = document.createElement('span'); span1.style.cssText='font-size:12px;color:var(--text-3);white-space:nowrap;'; span1.textContent='회 전체 /';
+    const paidInp = document.createElement('input'); paidInp.type='number'; paidInp.min=1; paidInp.value=msgState.fields.spPaidN||8;
+    paidInp.style.cssText='width:70px;font-size:16px;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);font-family:inherit;';
+    paidInp.addEventListener('input',()=>{ msgState.fields.spPaidN=Number(paidInp.value)||1; renderPreview(); });
+    const span2 = document.createElement('span'); span2.style.cssText='font-size:12px;color:var(--text-3);white-space:nowrap;'; span2.textContent='회 결제';
+    nw.appendChild(totInp); nw.appendChild(span1); nw.appendChild(paidInp); nw.appendChild(span2);
+    nRow.appendChild(nl); nRow.appendChild(nw); fieldsWrap.appendChild(nRow);
+
+    // 자동 계산 금액 힌트
+    const amt = Math.round((msgState.fields.spUnitPrice||0) * (msgState.fields.spPaidN||0));
+    const hint = document.createElement('div');
+    hint.style.cssText='font-size:12px;color:var(--text-3);padding:4px 0;';
+    hint.textContent = `→ 결제금액: ${moneyFmt(amt)}원 (${moneyFmt(msgState.fields.spUnitPrice||0)}원 × ${msgState.fields.spPaidN||0}회)`;
+    fieldsWrap.appendChild(hint);
+  }
+
   // ── 아카데미 기준회차 / 실입력 회차 ──
   if(fieldVisible('acadPlan')){
     const isResit = msgState.type==='academyResit';
@@ -1778,34 +1886,36 @@ function renderPreview(){
     if(msgState.sections.has('pay')){
       const isResit2 = msgState.type==='academyResit';
       const course2 = String(msgState.fields.course||'').trim();
-      const baseN2 = Number(msgState.fields.acadPlan)||8;
-      const inputN2 = msgState.fields.acadCustomN ?? baseN2;
-      const r2 = calcAcadMsgAmount(course2, isResit2, baseN2, inputN2,
-        msgState.fields.discFriend, msgState.fields.discReview,
-        msgState.fields.discOther?(msgState.fields.discOtherAmt||0):0,
-        msgState.fields.discAuditExclude);
-
-      let amtText2;
       const discParts2 = [];
       if(msgState.fields.discFriend) discParts2.push('지인할인 -10,000원');
       if(msgState.fields.discReview) discParts2.push('리뷰할인 -5,000원');
       if(msgState.fields.discOther && msgState.fields.discOtherAmt>0) discParts2.push(`기타할인 -${moneyFmt(msgState.fields.discOtherAmt)}원`);
       if(msgState.fields.discAuditExclude) discParts2.push('청강비 제외 -10,000원');
+      const discSuffix = discParts2.length>0 ? `\n  (${discParts2.join(', ')})` : '';
 
-      if(isResit2) {
-        // 재수강: "재수강 할인 금액 : 165,000원" 형식
-        amtText2 = `{RESIT_LABEL}`;
-      } else {
-        amtText2 = `${moneyFmt(r2.finalAmt)}원`;
-      }
-      if(discParts2.length>0) amtText2 += `\n  (${discParts2.join(', ')})`;
-
-      if(isResit2) {
-        // payAcademyBlock의 "금액 :" 라벨 자체를 "재수강 할인 금액 :"으로 교체
-        const block = applyVars(BLOCKS.payAcademyBlock, {amount: `${moneyFmt(r2.finalAmt)}원${discParts2.length>0?'\n  ('+discParts2.join(', ')+')':''}`});
-        parts.push(block.replace('- 금액 :', '- 재수강 할인 금액 :'));
-      } else {
+      let amtText2;
+      if(course2 === '[특강]'){
+        const unitPrice = msgState.fields.spUnitPrice||0;
+        const totalN = msgState.fields.spTotalN||0;
+        const paidN = msgState.fields.spPaidN||0;
+        const discTotal = (msgState.fields.discFriend?10000:0)+(msgState.fields.discReview?5000:0)+(msgState.fields.discOther?(msgState.fields.discOtherAmt||0):0)+(msgState.fields.discAuditExclude?10000:0);
+        const finalAmt = Math.max(0, Math.round(unitPrice*paidN) - discTotal);
+        amtText2 = `${moneyFmt(finalAmt)}원 (총 ${totalN}회 중 ${paidN}회 결제)${discSuffix}`;
         parts.push(applyVars(BLOCKS.payAcademyBlock, {amount: amtText2}));
+      } else {
+        const baseN2 = Number(msgState.fields.acadPlan)||8;
+        const inputN2 = msgState.fields.acadCustomN ?? baseN2;
+        const r2 = calcAcadMsgAmount(course2, isResit2, baseN2, inputN2,
+          msgState.fields.discFriend, msgState.fields.discReview,
+          msgState.fields.discOther?(msgState.fields.discOtherAmt||0):0,
+          msgState.fields.discAuditExclude);
+        amtText2 = `${moneyFmt(r2.finalAmt)}원${discSuffix}`;
+        if(isResit2){
+          const block = applyVars(BLOCKS.payAcademyBlock, {amount: amtText2});
+          parts.push(block.replace('- 금액 :', '- 재수강 할인 금액 :'));
+        } else {
+          parts.push(applyVars(BLOCKS.payAcademyBlock, {amount: amtText2}));
+        }
       }
     }
     if(msgState.sections.has('discount'))parts.push(BLOCKS.discountBlock.trim()+'\n');
@@ -1916,7 +2026,6 @@ const FEE_TABLE = {
     james:{label:'제임스 진짜영어',new:[{key:'w2',label:'주2회 (190,000 / 기준 8)',baseSessions:8,baseAmount:190000},{key:'w4',label:'주4회 (320,000 / 기준 16)',baseSessions:16,baseAmount:320000}],resit:[{key:'w2',label:'주2회 (185,000 / 기준 8)',baseSessions:8,baseAmount:185000},{key:'w4',label:'주4회 (310,000 / 기준 16)',baseSessions:16,baseAmount:310000}]},
     chris:{label:'크리스 미디어영어',new:[{key:'w2',label:'주2회 (180,000 / 기준 8)',baseSessions:8,baseAmount:180000},{key:'w4',label:'주4회 (310,000 / 기준 16)',baseSessions:16,baseAmount:310000}],resit:[{key:'w2',label:'주2회 (175,000 / 기준 8)',baseSessions:8,baseAmount:175000},{key:'w4',label:'주4회 (300,000 / 기준 16)',baseSessions:16,baseAmount:300000}]},
     courtney:{label:'코트니 Go-to영어',new:[{key:'m1',label:'1개월 (190,000 / 기준 8)',baseSessions:8,baseAmount:190000},{key:'m2',label:'2개월(2과목) (340,000 / 기준 16)',baseSessions:16,baseAmount:340000}],resit:[{key:'m1',label:'1개월 (185,000 / 기준 8)',baseSessions:8,baseAmount:185000},{key:'m2',label:'2개월(2과목) (330,000 / 기준 16)',baseSessions:16,baseAmount:330000}]},
-    tinaOpic:{label:'티나 오픽',new:[{key:'opic',label:'오픽 (235,000 / 총 8회)',baseSessions:8,baseAmount:235000}],resit:[{key:'opic',label:'오픽 (235,000 / 총 8회)',baseSessions:8,baseAmount:235000}]},
     zhaili:{label:'짜이뤼 중국어',new:[{key:'m1',label:'1개월 (150,000 / 기준 8)',baseSessions:8,baseAmount:150000},{key:'m2',label:'2개월 (280,000 / 기준 16)',baseSessions:16,baseAmount:280000}],resit:[{key:'m1',label:'1개월 (145,000 / 기준 8)',baseSessions:8,baseAmount:145000},{key:'m2',label:'2개월 (270,000 / 기준 16)',baseSessions:16,baseAmount:270000}]},
   },
   study:{only:{label:'원어민 회화스터디',new:[{key:'8',label:'8회 (150,000)',baseSessions:8,baseAmount:150000},{key:'16',label:'16회 (277,000)',baseSessions:16,baseAmount:277000},{key:'32',label:'32회 (494,000)',baseSessions:32,baseAmount:494000}],resit:[{key:'8',label:'8회 (150,000)',baseSessions:8,baseAmount:150000},{key:'16',label:'16회 (277,000)',baseSessions:16,baseAmount:277000},{key:'32',label:'32회 (494,000)',baseSessions:32,baseAmount:494000}]}}
