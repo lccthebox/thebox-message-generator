@@ -954,6 +954,9 @@ function getTomorrowKST(){
   d.setDate(d.getDate() + 1);
   return d;
 }
+function toLocalISODate(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 function getKoreanWeekday(d){
   const arr = ['일','월','화','수','목','금','토'];
   return arr[d.getDay()];
@@ -1022,6 +1025,27 @@ const STUDY_PLANS = [
   { key:'48',  label:'48회', price:657000, note:'총 48회, 9개월 내 사용' },
   { key:'custom', label:'기타 횟수', price:277000, note:'277,000원 기준 N/16 계산' },
 ];
+const STUDY_CONVERSION_CURRENT = {
+  16: 277000,
+  32: 494000,
+  48: 657000,
+};
+const STUDY_CONVERSION_TARGETS = {
+  48: 657000,
+  96: 1090000,
+};
+function calcStudyConversion(currentSessions, targetSessions, paidAmount) {
+  const addedSessions = targetSessions - currentSessions;
+  const targetPrice = STUDY_CONVERSION_TARGETS[targetSessions] || 0;
+  const payment = Math.max(0, targetPrice - paidAmount);
+  return {
+    addedSessions,
+    payment,
+    months: Math.round(addedSessions / 16 * 3),
+    unitPrice: addedSessions > 0 ? Math.round(payment / addedSessions) : 0,
+    savings: Math.max(0, targetSessions / 16 * STUDY_PLANS[0].price - targetPrice),
+  };
+}
 function calcStudyMsgAmount(plan, customN) {
   if(plan==='custom') {
     const n = Number(customN)||1;
@@ -1060,6 +1084,7 @@ const MSG_SECTIONS = [
   { key:'creditLast', label:'스터디 마지막 안내' },
   { key:'creditInfo', label:'크레딧 안내' },
   { key:'creditPay', label:'스터디 연장 결제 안내' },
+  { key:'creditConvert', label:'결제 전환 안내' },
 ];
 
 const ACADEMY_COURSES = [
@@ -1181,6 +1206,7 @@ const BLOCKS = {
   creditLastBlock:`[영어회화는 더박스]\n오늘이 원어민 회화스터디 마지막 크레딧 입니다.\n영어로 말하기 편해지심을 느끼셨나요? 여기서 멈추긴 너무 아쉽잖아요!\n연장시 '레벨 월반 테스트' 받고 다음 레벨로 도전해 보세요!\n- 연장 및 테스트 문의는 답장 부탁드립니다.\n- 인기가 많은 타임이라 대기자분들을 위해 연장 여부를 꼭 알려주시면 감사하겠습니다. 🙏\n`,
   creditInfoBlock:`[영어회화는 더박스]\n안녕하세요. 남아있는 크레딧 및 만료일 안내드립니다.\n- 남은 크레딧 횟수 : {credits}\n- 사용 가능 기간 : {creditDate}\n\n✅ 크레딧은 사용 만료일이 지나면 자동 소멸되오니, 기간 내 모두 사용해주시길 부탁드립니다.\n궁금하신 점 있으시면 언제든지 편하게 문의해주세요!\n`,
   creditPayBlock:`[영어회화는 더박스]\n안녕하세요. 스터디 연장 결제 안내드립니다.😊\n\n- 연장 금액: {extendPrice}\n- 결제방식 : 카드 (현장결제 / 모바일결제), 계좌이체, 온누리 및 대구로페이결제 가능\n- 이체시 결제 계좌 : iM뱅크(구. 대구은행) 01085119664 더박스\n\n▪ 온라인 링크로 카드 결제시 결제링크 받으실 번호 부탁 드립니다.\n▪ 이체시에는 상기 계좌로 이체 후에 현금영수증 발급을 위한 번호 혹은 사업자등록번호도 함께 남겨주시면 됩니다.\n`,
+  creditConvertBlock:`[영어회화는 더박스]\n안녕하세요. 원어민 회화스터디 수강권 결제 전환 안내드립니다.😊\n\n현재 {currentSessions}회 수강권에서 총 {targetSessions}회 수강권으로 전환하시면,\n- 기존 결제금액 : {paidAmount}원 (100% 차감)\n- 추가 크레딧 : {addedSessions}회\n- 추가 결제금액 : {payment}원\n- 추가 크레딧 사용기간 : {months}개월\n- 추가 1회당 단가 : {unitPrice}원\n- 단품(16회) 계속 연장 대비 총 혜택 : {savings}원\n\n※ 결제 전환은 기존 수강권 만료일 이전에 신청 가능합니다.\n※ 총 이용기간은 최초 결제(등록)일 기준으로 홀딩 기간을 포함해 재산정됩니다.\n※ 추가된 크레딧은 안내된 기간 내 사용해야 하며, 잔여 크레딧 처리는 별도 규정을 따릅니다.\n※ 결제 전환에는 지인할인 / 1+1할인 / 리뷰할인이 추가 적용되지 않습니다.\n\n- 결제방식 : 카드 (현장결제 / 모바일결제), 계좌이체, 온누리 및 대구로페이결제 가능\n- 이체시 결제 계좌 : iM뱅크(구. 대구은행) 01085119664 더박스\n\n▪ 온라인 링크로 카드 결제시 결제링크 받으실 번호 부탁 드립니다.\n▪ 이체시에는 상기 계좌로 이체 후에 현금영수증 발급을 위한 번호 혹은 사업자등록번호도 함께 남겨주시면 됩니다.\n`,
   certFixed:`안녕하세요, 더박스입니다. 😊\n\n요청하신 서류는 아래 링크를 통해 신청하실 수 있습니다.\n필요하신 서류를 선택하고 정보를 남겨주시면, \n확인 후 기재해 주신 이메일로 발송해 드리겠습니다.\n\n🔗 제출서류 신청하기 : https://lccthebox.github.io/tools/cert/\n\n감사합니다!\n`,
   holdingFixed:`안녕하세요, 더박스입니다. 😊\n요청하신 수강 홀딩 신청은 아래 링크에서 진행하실 수 있습니다.\n링크 접속 후 [수강 홀딩신청서]를 선택하셔서 정보를 입력해 주세요.\n(※ 담당 선생님과 상담 완료 된 날짜를 꼭 기재해 주셔야 합니다.)\n작성해 주신 내용은 확인 후 빠르게 처리 도와드리겠습니다.\n\n🔗 홀딩 신청서 작성하기 : https://lccthebox.github.io/tools/cert/\n\n감사합니다!\n`,
   nativeInquiryFixed:`Hello, thank you for reaching out to us!\n\nWe're a language exchange community.\nWe don't just do language exchange,  we also have parties and various activities you can join 🙂\n\nTo check your preferred schedule and level, could you please fill out the short form in the link below?\nWe have a manager who specializes in Korean classes, and that manager will contact you directly after reviewing your info.\n\nhttps://lccthebox.github.io/community\n`,
@@ -1236,11 +1262,12 @@ const FT_PACKAGES = [
 
 
 const _today = new Date();
+const _tomorrow = getTomorrowKST();
 const msgState = {
   type: 'studyStart',
   sections: new Set(DEFAULT_SECTIONS_BY_TYPE.studyStart),
   fields: {
-    month: String(_today.getMonth()+1), day: String(_today.getDate()), time:TIME_OPTIONS.study[0],
+    startDate: toLocalISODate(_today), month: String(_today.getMonth()+1), day: String(_today.getDate()), time:TIME_OPTIONS.study[0],
     level:STUDY_LEVELS[0],
     amountStudy:DEFAULT_PRICE_TEXT.study['원어민 회화스터디'],
     studyPlan: '16', studyCustomN: 16, // 스터디 플랜 선택
@@ -1249,13 +1276,14 @@ const msgState = {
     loc:(LOCATIONS[ACADEMY_COURSES[0]]||[''])[0],
     amountAcademy:DEFAULT_PRICE_TEXT.academy[ACADEMY_COURSES[0]]||'',
     auditCourse:'원어민 회화스터디', auditLoc:'6층', auditFeeStatus:'paid',
-    consultMonth:String(_today.getMonth()+1), consultDay:String(_today.getDate()), consultWeekday:['일','월','화','수','목','금','토'][_today.getDay()],
+    consultDate:toLocalISODate(_tomorrow), consultMonth:String(_tomorrow.getMonth()+1), consultDay:String(_tomorrow.getDate()), consultWeekday:getKoreanWeekday(_tomorrow),
     consultAmPm:'오전', consultHour:'10', consultMin:'00', consultTimeOther:'',
     ftPkgKey:'ft2', ftAmount:'418,500', ftResit: false,
     spUnitPrice:0, spTotalN:8, spPaidN:8, spName:'', // [특강] 단가/전체횟수/결제횟수/특강명
     discFriend: false, discReview: false, discOther: false, discOtherAmt: 0, discAuditExclude: false,
     extendPrice:DEFAULT_PRICE_TEXT.studyExtend['원어민 회화스터디'],
     extendPlan:'16', extendCustomN:16,
+    convertCurrent:16, convertTarget:48, convertPaid:277000,
   }
 };
 
@@ -1278,14 +1306,14 @@ function renderTypeChips(){
     lab.querySelector('input').addEventListener('change', (e)=>{
       msgState.type = e.target.value;
       msgState.sections = new Set(DEFAULT_SECTIONS_BY_TYPE[msgState.type]||[]);
-      if(msgState.type==='consult'){const tmr=getTomorrowKST();msgState.fields.consultMonth=String(tmr.getMonth()+1);msgState.fields.consultDay=String(tmr.getDate());msgState.fields.consultWeekday=getKoreanWeekday(tmr);msgState.fields.consultAmPm='오전';msgState.fields.consultHour='10';msgState.fields.consultMin='00';msgState.fields.consultTimeOther='';}
-      if(msgState.type==='studyStart'){msgState.fields.time=TIME_OPTIONS.study[0];msgState.fields.level=STUDY_LEVELS[0];msgState.fields.amountStudy=DEFAULT_PRICE_TEXT.study['원어민 회화스터디'];}
-      if(msgState.type==='academyStart'||msgState.type==='academyResit'){const first=ACADEMY_COURSES[0];msgState.fields.course=first;const ct=COURSE_TIMES[first];msgState.fields.time=(ct&&ct.length>0)?ct[0]:'';msgState.fields.loc=(LOCATIONS[first]||[''])[0];msgState.fields.amountAcademy=(msgState.type==='academyResit')?(DEFAULT_PRICE_TEXT.academyResit[first]||''):(DEFAULT_PRICE_TEXT.academy[first]||'');}
-      if(msgState.type==='audit'){const c=msgState.fields.course||ACADEMY_COURSES[0];msgState.fields.course=c;msgState.fields.loc=(LOCATIONS[c]||[''])[0];const ct2=COURSE_TIMES[c];msgState.fields.time=(ct2&&ct2.length>0)?ct2[0]:'';msgState.fields.auditFeeStatus='paid';}
+      if(msgState.type==='studyStart'){if(!TIME_OPTIONS.study.includes(msgState.fields.time))msgState.fields.time=TIME_OPTIONS.study[0];msgState.fields.level=STUDY_LEVELS[0];msgState.fields.amountStudy=DEFAULT_PRICE_TEXT.study['원어민 회화스터디'];}
+      if(msgState.type==='academyStart'||msgState.type==='academyResit'){const first=ACADEMY_COURSES[0];msgState.fields.course=first;const ct=COURSE_TIMES[first];if(ct&&ct.length>0&&!ct.includes(msgState.fields.time))msgState.fields.time=ct[0];msgState.fields.loc=(LOCATIONS[first]||[''])[0];msgState.fields.amountAcademy=(msgState.type==='academyResit')?(DEFAULT_PRICE_TEXT.academyResit[first]||''):(DEFAULT_PRICE_TEXT.academy[first]||'');}
+      if(msgState.type==='audit'){const c=msgState.fields.course||ACADEMY_COURSES[0];msgState.fields.course=c;msgState.fields.loc=(LOCATIONS[c]||[''])[0];const ct2=COURSE_TIMES[c];if(ct2&&ct2.length>0&&!ct2.includes(msgState.fields.time))msgState.fields.time=ct2[0];msgState.fields.auditFeeStatus='paid';}
       if(msgState.type==='fasttrack'){
         msgState.fields.course=ACADEMY_COURSES_FT[0];
         msgState.fields.loc=(LOCATIONS[ACADEMY_COURSES_FT[0]]||[''])[0];
-        msgState.fields.time=TIME_OPTIONS.academyCommon[0];
+        const ftTimes=COURSE_TIMES[ACADEMY_COURSES_FT[0]];
+        if(ftTimes&&ftTimes.length>0&&!ftTimes.includes(msgState.fields.time))msgState.fields.time=ftTimes[0];
         msgState.fields.ftPkgKey='ft2';
         msgState.fields.ftSessions={};
         FT_PACKAGES[0].parts.forEach(p=>{ msgState.fields.ftSessions[p.id]=p.baseN; });
@@ -1306,7 +1334,7 @@ function renderSections(){
   else if(msgState.type==='studyStart')['studyEnroll','pay','discount','cafe'].forEach(k=>visibleKeys.add(k));
   else if(msgState.type==='academyStart')['academyEnroll','pay','discount','schedule'].forEach(k=>visibleKeys.add(k));
   else if(msgState.type==='academyResit')['academyEnroll','pay','discount','schedule'].forEach(k=>visibleKeys.add(k));
-  else if(msgState.type==='studyExtend')['creditLast','creditInfo','creditPay'].forEach(k=>visibleKeys.add(k));
+  else if(msgState.type==='studyExtend')['creditLast','creditInfo','creditPay','creditConvert'].forEach(k=>visibleKeys.add(k));
   else if(msgState.type==='fasttrack')['ftEnroll','pay','discount','schedule'].forEach(k=>visibleKeys.add(k));
   else MSG_SECTIONS.forEach(s=>visibleKeys.add(s.key));
   MSG_SECTIONS.forEach(s=>{
@@ -1336,7 +1364,13 @@ function fieldVisible(fieldKey){
     if(fieldKey==='ftPkgKey'||fieldKey==='ftAmount')return msgState.sections.has('pay');
     return false;
   }
-  if(t==='studyExtend'){if(fieldKey==='credits')return msgState.sections.has('creditInfo');if(fieldKey==='creditDate')return msgState.sections.has('creditInfo');if(fieldKey==='extendPrice')return msgState.sections.has('creditPay');return false;}
+  if(t==='studyExtend'){
+    if(fieldKey==='credits')return msgState.sections.has('creditInfo');
+    if(fieldKey==='creditDate')return msgState.sections.has('creditInfo');
+    if(fieldKey==='extendPrice')return msgState.sections.has('creditPay');
+    if(['convertCurrent','convertTarget','convertPaid'].includes(fieldKey))return msgState.sections.has('creditConvert');
+    return false;
+  }
   return false;
 }
 
@@ -1360,12 +1394,7 @@ function renderFields(){
   fieldsWrap.innerHTML='';
   if(msgState.type==='consult'){
     // 상담톡 날짜 피커
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    // 기존 날짜 있으면 유지
-    const defaultConsultVal = (msgState.fields.consultMonth && msgState.fields.consultDay)
-      ? `${yyyy}-${String(msgState.fields.consultMonth).padStart(2,'0')}-${String(msgState.fields.consultDay).padStart(2,'0')}`
-      : `${yyyy}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    const defaultConsultVal = msgState.fields.consultDate || toLocalISODate(new Date());
     const dateInput = document.createElement('input');
     dateInput.type = 'date';
     dateInput.value = defaultConsultVal;
@@ -1376,6 +1405,7 @@ function renderFields(){
       const parts = val.split('-');
       if(parts.length===3){
         const d = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
+        msgState.fields.consultDate    = val;
         msgState.fields.consultMonth   = String(d.getMonth()+1);
         msgState.fields.consultDay     = String(d.getDate());
         msgState.fields.consultWeekday = getKoreanWeekday(d);
@@ -1386,10 +1416,12 @@ function renderFields(){
     // 기존 날짜 없을 때만 동기화
     if(!msgState.fields.consultMonth || !msgState.fields.consultDay) syncConsultDate(defaultConsultVal);
 
-    dateInput.addEventListener('change', () => {
+    const updateConsultDate = () => {
       syncConsultDate(dateInput.value);
       renderPreview();
-    });
+    };
+    dateInput.addEventListener('input', updateConsultDate);
+    dateInput.addEventListener('change', updateConsultDate);
     addRow('예약 날짜', dateInput);
 
     const weekRow=document.createElement('div');weekRow.className='form-row';
@@ -1415,12 +1447,7 @@ function renderFields(){
   if(msgState.type==='cert'||msgState.type==='nativeInquiry'){const div=document.createElement('div');div.style.color='var(--text-3)';div.style.fontSize='13px';div.textContent='입력할 항목이 없습니다.';fieldsWrap.appendChild(div);return;}
 
   if(fieldVisible('month')){
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    // 기존 값이 있으면 유지, 없으면 오늘
-    const existingVal = (msgState.fields.month && msgState.fields.day)
-      ? `${yyyy}-${String(msgState.fields.month).padStart(2,'0')}-${String(msgState.fields.day).padStart(2,'0')}`
-      : `${yyyy}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    const existingVal = msgState.fields.startDate || toLocalISODate(new Date());
     const i = document.createElement('input');
     i.type = 'date';
     i.value = existingVal;
@@ -1430,6 +1457,7 @@ function renderFields(){
       const parts = val.split('-');
       if(parts.length===3){
         const d = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
+        msgState.fields.startDate = val;
         msgState.fields.month = String(d.getMonth()+1);
         msgState.fields.day   = String(d.getDate());
       }
@@ -1437,10 +1465,12 @@ function renderFields(){
     // 기존 값 없을 때만 오늘로 동기화
     if(!msgState.fields.month || !msgState.fields.day) syncStartDate(existingVal);
 
-    i.addEventListener('change', () => {
+    const updateStartDate = () => {
       syncStartDate(i.value);
       renderPreview();
-    });
+    };
+    i.addEventListener('input', updateStartDate);
+    i.addEventListener('change', updateStartDate);
     addRow('시작 날짜', i);
   }
   if(fieldVisible('time')){
@@ -1449,8 +1479,9 @@ function renderFields(){
       const course = msgState.fields.course || '';
       const courseTimes = COURSE_TIMES[course];
       if(courseTimes && courseTimes.length > 0){
-        // 현재 저장된 시간이 목록에 있으면 유지, 없으면 첫 번째로 (하지만 msgState는 변경하지 않음)
+        // 화면에 표시하는 시간과 미리보기 상태를 항상 일치시킨다.
         const curTime = courseTimes.includes(msgState.fields.time) ? msgState.fields.time : courseTimes[0];
+        msgState.fields.time = curTime;
         const s = mkSelect(courseTimes, curTime);
         s.addEventListener('change',()=>{ msgState.fields.time=s.value; renderPreview(); });
         addRow('시간', s);
@@ -1464,6 +1495,7 @@ function renderFields(){
     } else {
       const opts = TIME_OPTIONS.study;
       const curTime = opts.includes(msgState.fields.time) ? msgState.fields.time : (msgState.fields.time || opts[0]);
+      msgState.fields.time = curTime;
       const s = mkSelect(opts, curTime);
       s.addEventListener('change',()=>{ msgState.fields.time=s.value; renderPreview(); });
       addRow('시간', s);
@@ -1848,6 +1880,54 @@ function renderFields(){
   }
   if(fieldVisible('credits')){const i=mkInput('text',msgState.fields.credits||'');i.placeholder='예: 3회';i.addEventListener('input',()=>{msgState.fields.credits=i.value;renderPreview();});addRow('남은 크레딧',i);}
   if(fieldVisible('creditDate')){const i=mkInput('text',msgState.fields.creditDate||'');i.placeholder='예: 2월 28일까지';i.addEventListener('input',()=>{msgState.fields.creditDate=i.value;renderPreview();});addRow('만료일/기간',i);}
+  if(fieldVisible('convertCurrent')){
+    const currentSelect=mkSelect(['16','32','48'],String(msgState.fields.convertCurrent||16));
+    currentSelect.addEventListener('change',()=>{
+      msgState.fields.convertCurrent=Number(currentSelect.value);
+      msgState.fields.convertPaid=STUDY_CONVERSION_CURRENT[msgState.fields.convertCurrent];
+      if(Number(msgState.fields.convertTarget)<=msgState.fields.convertCurrent){
+        msgState.fields.convertTarget=Object.keys(STUDY_CONVERSION_TARGETS).map(Number).find(n=>n>msgState.fields.convertCurrent);
+      }
+      renderFields();renderPreview();
+    });
+    addRow('기존 수강권',currentSelect);
+
+    const targetOptions=Object.keys(STUDY_CONVERSION_TARGETS).map(Number).filter(n=>n>Number(msgState.fields.convertCurrent));
+    if(!targetOptions.includes(Number(msgState.fields.convertTarget)))msgState.fields.convertTarget=targetOptions[0];
+    const targetSelect=mkSelect(targetOptions.map(String),String(msgState.fields.convertTarget));
+    targetSelect.addEventListener('change',()=>{msgState.fields.convertTarget=Number(targetSelect.value);renderFields();renderPreview();});
+    addRow('총 목표 횟수',targetSelect);
+
+    const paidInput=mkInput('number',msgState.fields.convertPaid||0,{min:0,step:1000});
+    addRow('기존 결제금액',paidInput);
+
+    const conversion=calcStudyConversion(Number(msgState.fields.convertCurrent),Number(msgState.fields.convertTarget),Number(msgState.fields.convertPaid));
+    const addedInput=mkInput('text',`${conversion.addedSessions}회`,{readOnly:true});
+    addRow('추가 크레딧',addedInput);
+    const paymentInput=mkInput('text',`${moneyFmt(conversion.payment)}원`,{readOnly:true});
+    addRow('추가 결제금액',paymentInput);
+    const periodInput=mkInput('text',`${conversion.months}개월`,{readOnly:true});
+    addRow('추가 사용기간',periodInput);
+    const unitInput=mkInput('text',`${moneyFmt(conversion.unitPrice)}원`,{readOnly:true});
+    addRow('추가 회당 단가',unitInput);
+    const savingsInput=mkInput('text',`${moneyFmt(conversion.savings)}원`,{readOnly:true});
+    addRow('총 혜택',savingsInput);
+    paidInput.addEventListener('input',()=>{
+      msgState.fields.convertPaid=Math.max(0,Number(paidInput.value)||0);
+      const updated=calcStudyConversion(Number(msgState.fields.convertCurrent),Number(msgState.fields.convertTarget),msgState.fields.convertPaid);
+      addedInput.value=`${updated.addedSessions}회`;
+      paymentInput.value=`${moneyFmt(updated.payment)}원`;
+      periodInput.value=`${updated.months}개월`;
+      unitInput.value=`${moneyFmt(updated.unitPrice)}원`;
+      savingsInput.value=`${moneyFmt(updated.savings)}원`;
+      renderPreview();
+    });
+
+    const note=document.createElement('div');
+    note.className='help-text';
+    note.textContent='표준 결제금액이 자동 입력됩니다. 실제 결제금액이 다르면 영수증 금액으로 수정하세요.';
+    fieldsWrap.appendChild(note);
+  }
   if(fieldVisible('extendPrice')){
     const esp = document.createElement('select');
     STUDY_PLANS.forEach(p=>{
@@ -1868,11 +1948,11 @@ function renderFields(){
   if(!fieldsWrap.children.length){const div=document.createElement('div');div.style.color='var(--text-3)';div.style.fontSize='13px';div.textContent='선택된 섹션에 입력할 항목이 없습니다.';fieldsWrap.appendChild(div);}
 }
 
-function formatDateFromMD(month, day){
+function formatDateFromMD(month, day, isoDate){
   const m = String(month||'').trim();
   const d = String(day||'').trim();
   if(!m || !d) return '';
-  const year = new Date().getFullYear();
+  const year = isoDate ? Number(String(isoDate).split('-')[0]) : new Date().getFullYear();
   // 로컬 타임존 기준으로 Date 생성 (UTC 파싱 방지)
   const dt = new Date(year, Number(m)-1, Number(d));
   const w = isNaN(dt) ? '' : getKoreanWeekday(dt);
@@ -1906,7 +1986,7 @@ function renderPreview(){
   if(msgState.type==='cert'){previewMsg.textContent=BLOCKS.certFixed;return;}
   if(msgState.type==='holding'){previewMsg.textContent=BLOCKS.holdingFixed;return;}
   if(msgState.type==='nativeInquiry'){previewMsg.textContent=BLOCKS.nativeInquiryFixed;return;}
-  const date=formatDateFromMD(msgState.fields.month,msgState.fields.day);const time=String(msgState.fields.time||'').trim();const parts=[];
+  const date=formatDateFromMD(msgState.fields.month,msgState.fields.day,msgState.fields.startDate);const time=String(msgState.fields.time||'').trim();const parts=[];
   if(msgState.type==='fasttrack'){
     parts.push(BLOCKS.ftHeader.trim()+'\n');
     if(msgState.sections.has('ftEnroll'))parts.push(applyVars(BLOCKS.ftEnrollBlock,{date,time,ftCourse:String(msgState.fields.course||'').trim(),loc:String(msgState.fields.loc||'').trim()}));
@@ -2017,6 +2097,22 @@ function renderPreview(){
       const extendText = `${moneyFmt(res.amt)}원 (${res.note})`;
       parts.push(applyVars(BLOCKS.creditPayBlock,{extendPrice:extendText}));
     }
+    if(msgState.sections.has('creditConvert')){
+      const currentSessions=Number(msgState.fields.convertCurrent);
+      const targetSessions=Number(msgState.fields.convertTarget);
+      const paidAmount=Number(msgState.fields.convertPaid);
+      const conversion=calcStudyConversion(currentSessions,targetSessions,paidAmount);
+      parts.push(applyVars(BLOCKS.creditConvertBlock,{
+        currentSessions,
+        targetSessions,
+        paidAmount:moneyFmt(paidAmount),
+        addedSessions:conversion.addedSessions,
+        payment:moneyFmt(conversion.payment),
+        months:conversion.months,
+        unitPrice:moneyFmt(conversion.unitPrice),
+        savings:moneyFmt(conversion.savings),
+      }));
+    }
     previewMsg.textContent=parts.join('\n').replace(/\n{3,}/g,'\n\n').trim()+'\n';return;
   }
   previewMsg.textContent='';
@@ -2024,7 +2120,7 @@ function renderPreview(){
 
 function initMsg(){renderTypeChips();renderSections();renderFields();renderPreview();}
 document.getElementById('btnCopyMsg').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(previewMsg.textContent);alert('복사 완료');}catch(e){alert('복사 실패');}});
-document.getElementById('btnResetMsg').addEventListener('click',()=>{msgState.type='studyStart';msgState.sections=new Set(DEFAULT_SECTIONS_BY_TYPE.studyStart);msgState.fields.month='1';msgState.fields.day='10';msgState.fields.time=TIME_OPTIONS.study[0];msgState.fields.level=STUDY_LEVELS[0];msgState.fields.amountStudy=DEFAULT_PRICE_TEXT.study['원어민 회화스터디'];msgState.fields.course=ACADEMY_COURSES[0];msgState.fields.loc=(LOCATIONS[ACADEMY_COURSES[0]]||[''])[0];msgState.fields.amountAcademy=DEFAULT_PRICE_TEXT.academy[ACADEMY_COURSES[0]]||'';msgState.fields.auditFeeStatus='paid';const tmr=getTomorrowKST();msgState.fields.consultMonth=String(tmr.getMonth()+1);msgState.fields.consultDay=String(tmr.getDate());msgState.fields.consultWeekday=getKoreanWeekday(tmr);msgState.fields.consultAmPm='오전';msgState.fields.consultHour='10';msgState.fields.consultMin='00';msgState.fields.consultTimeOther='';msgState.fields.credits='';msgState.fields.creditDate='';msgState.fields.extendPrice=DEFAULT_PRICE_TEXT.studyExtend['원어민 회화스터디'];renderTypeChips();renderSections();renderFields();renderPreview();});
+document.getElementById('btnResetMsg').addEventListener('click',()=>{const today=new Date();msgState.type='studyStart';msgState.sections=new Set(DEFAULT_SECTIONS_BY_TYPE.studyStart);msgState.fields.startDate=toLocalISODate(today);msgState.fields.month=String(today.getMonth()+1);msgState.fields.day=String(today.getDate());msgState.fields.time=TIME_OPTIONS.study[0];msgState.fields.level=STUDY_LEVELS[0];msgState.fields.amountStudy=DEFAULT_PRICE_TEXT.study['원어민 회화스터디'];msgState.fields.course=ACADEMY_COURSES[0];msgState.fields.loc=(LOCATIONS[ACADEMY_COURSES[0]]||[''])[0];msgState.fields.amountAcademy=DEFAULT_PRICE_TEXT.academy[ACADEMY_COURSES[0]]||'';msgState.fields.auditFeeStatus='paid';const tmr=getTomorrowKST();msgState.fields.consultDate=toLocalISODate(tmr);msgState.fields.consultMonth=String(tmr.getMonth()+1);msgState.fields.consultDay=String(tmr.getDate());msgState.fields.consultWeekday=getKoreanWeekday(tmr);msgState.fields.consultAmPm='오전';msgState.fields.consultHour='10';msgState.fields.consultMin='00';msgState.fields.consultTimeOther='';msgState.fields.credits='';msgState.fields.creditDate='';msgState.fields.extendPrice=DEFAULT_PRICE_TEXT.studyExtend['원어민 회화스터디'];msgState.fields.convertCurrent=16;msgState.fields.convertTarget=48;msgState.fields.convertPaid=277000;renderTypeChips();renderSections();renderFields();renderPreview();});
 
 /* =========================================================
    패스트트랙 패키지 계산기
