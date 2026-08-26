@@ -1124,7 +1124,6 @@ const ACADEMY_COURSES = [
   '[특강]',
 ];
 const TREND_OPIC_COURSE = '티나 트렌드 오픽';
-const TREND_OPIC_STUDY_OPTIONS = ['월·수 오후 7시 시작','화·목 오후 8시 30분 시작'];
 const ACADEMY_COURSES_FT = ACADEMY_COURSES.filter(c => c !== '제임스 진짜영어' && c !== '조이 미디어영어' && c !== '제시카 탄탄영어' && c !== '티나 트렌드 오픽' && c !== '[특강]');
 function getAcademyPlanOptions(course) {
   if(course === '제시카 탄탄영어') return [['12','1달 (12회)'],['24','2달 (24회)']];
@@ -1245,8 +1244,8 @@ const BLOCKS = {
   academyStartHeader:`[영어회화는 더박스]\n안녕하세요. 시작하시는 수업 안내 드리겠습니다.😊\n`,
   academyResitHeader:`[영어회화는 더박스]\n안녕하세요. 재수강 안내 드리겠습니다.😊\n`,
   academyEnrollBlock:`🔸수강 및 정보 🔸\n- 시작 일자 및 시간 : {date} {time}\n- 강좌명 : {course}\n- 강의실 : {loc}\n`,
-  trendOpicEnrollBlock:`🔸트렌드 오픽 수강 안내🔸\n- 시작 일자 : {date}\n- 시작 시간 : {time}\n- 강좌명 : 티나 트렌드 오픽\n- 본수업 : 매주 월·수\n  오후 8시 30분~10시 30분 (2시간)\n- 필수 스터디 : {studySchedule}\n  (1시간~1시간 30분, 주 2회)\n- 강의실 : {loc}\n- 혜택 : 소수정예 개별 피드백 시트 제공\n\n※ 트렌드 오픽은 본수업 주 2회와 선택한 필수 스터디 그룹을 함께 참여하는 과정입니다.\n`,
-  trendOpicAuditBlock:`🔸트렌드 오픽 청강 안내🔸\n- 청강 일자 : {date}\n- 청강 시간 : {time}\n- 수강명 : 티나 트렌드 오픽\n- 본수업 : 매주 월·수\n  오후 8시 30분~10시 30분 (2시간)\n- 필수 스터디 : {studySchedule}\n  (1시간~1시간 30분, 주 2회)\n- 위치 : {loc}\n- 혜택 : 소수정예 개별 피드백 시트 제공\n`,
+  trendOpicEnrollBlock:`🔸트렌드 오픽 수강 안내🔸\n- 시작 일자 : {date}\n- 시작 시간 : {time}\n- 강좌명 : 티나 트렌드 오픽\n- 본수업 : 매주 월·수\n  오후 8시 30분~10시 30분 (2시간)\n- 필수 스터디 시간\n  · 월·수 오후 7시 시작\n  · 화·목 오후 8시 30분 시작\n  (두 시간대 중 선택, 1시간~1시간 30분)\n- 강의실 : {loc}\n- 혜택 : 소수정예 개별 피드백 시트 제공\n`,
+  trendOpicAuditBlock:`🔸트렌드 오픽 청강 안내🔸\n- 청강 일자 : {date}\n- 청강 시간 : {time}\n- 수강명 : 티나 트렌드 오픽\n- 본수업 : 매주 월·수\n  오후 8시 30분~10시 30분 (2시간)\n- 필수 스터디 시간\n  · 월·수 오후 7시 시작\n  · 화·목 오후 8시 30분 시작\n  (두 시간대 중 선택, 1시간~1시간 30분)\n- 위치 : {loc}\n- 혜택 : 소수정예 개별 피드백 시트 제공\n`,
   trendOpicResitNote:`🔸IH 목표 재수강 혜택🔸\n- IH 미달 시 바로 다음 달 재수강료 50% 할인\n- 재수강 금액 : 117,500원 (정상가 235,000원)\n※ IH 미달 확인 후 다음 달 연속 재수강 시 적용됩니다.\n※ 재수강 혜택 외 추가 연장 할인은 없습니다.\n`,
   payStudyBlock:`🔸결제 정보🔸\n- 금액 : {amount}\n- 결제방식 : 카드 (현장결제 / 모바일결제), 계좌이체, 온누리 및 대구로페이결제 가능\n- 이체시 결제 계좌 : iM뱅크(구. 대구은행) 01085119664 더박스\n\n▪ 온라인 링크로 카드 결제시 결제링크 받으실 번호 부탁 드립니다.\n▪ 이체시에는 상기 계좌로 이체 후에 현금영수증 발급을 위한 번호 혹은 사업자등록번호도 함께 남겨주시면 됩니다.\n`,
   payAcademyBlock:`🔸결제 정보🔸\n- 금액 : {amount}\n- 결제방식 : 카드 (현장결제 / 모바일결제), 계좌이체, 온누리 및 대구로페이결제 가능\n- 이체시 결제 계좌 : iM뱅크(구. 대구은행) 01086739664 더박스\n\n▪ 온라인 링크로 카드 결제시 결제링크 받으실 번호 부탁 드립니다.\n▪ 이체시에는 상기 계좌로 이체 후에 현금영수증 발급을 위한 번호 혹은 사업자등록번호도 함께 남겨주시면 됩니다.\n`,
@@ -1325,7 +1324,6 @@ const msgState = {
     amountStudy:DEFAULT_PRICE_TEXT.study['원어민 회화스터디'],
     studyPlan: '16', studyCustomN: 16, // 스터디 플랜 선택
     acadPlan: '8', acadCustomN: 8,      // 아카데미 기준회차 (8=1달, 16=2달)
-    trendOpicStudy:TREND_OPIC_STUDY_OPTIONS[0],
     course:ACADEMY_COURSES[0],
     loc:(LOCATIONS[ACADEMY_COURSES[0]]||[''])[0],
     amountAcademy:DEFAULT_PRICE_TEXT.academy[ACADEMY_COURSES[0]]||'',
@@ -1626,15 +1624,6 @@ function renderFields(){
       renderFields();renderPreview();
     });
     addRow('강좌명',s);
-  }
-  if(msgState.fields.course===TREND_OPIC_COURSE && ['audit','academyStart','academyResit'].includes(msgState.type)){
-    const studySchedule = TREND_OPIC_STUDY_OPTIONS.includes(msgState.fields.trendOpicStudy)
-      ? msgState.fields.trendOpicStudy
-      : TREND_OPIC_STUDY_OPTIONS[0];
-    msgState.fields.trendOpicStudy = studySchedule;
-    const s = mkSelect(TREND_OPIC_STUDY_OPTIONS, studySchedule);
-    s.addEventListener('change',()=>{ msgState.fields.trendOpicStudy=s.value; renderPreview(); });
-    addRow('필수 스터디',s);
   }
   if(fieldVisible('loc')){
     const locList = LOCATIONS[msgState.fields.course] || [];
@@ -2095,7 +2084,7 @@ function renderPreview(){
     parts.push(BLOCKS.auditHeader.trim()+'\n');
     if(msgState.sections.has('auditInfo')){
       const auditBlock = msgState.fields.course===TREND_OPIC_COURSE ? BLOCKS.trendOpicAuditBlock : BLOCKS.auditInfoBlock;
-      parts.push(applyVars(auditBlock,{date,time,course:String(msgState.fields.course||'').trim(),loc:String(msgState.fields.loc||'').trim(),studySchedule:String(msgState.fields.trendOpicStudy||'').trim()}));
+      parts.push(applyVars(auditBlock,{date,time,course:String(msgState.fields.course||'').trim(),loc:String(msgState.fields.loc||'').trim()}));
     }
     if(msgState.sections.has('auditFee'))parts.push((msgState.fields.auditFeeStatus==='paid'?BLOCKS.auditFeePaid:BLOCKS.auditFeeUnpaid).trim()+'\n');
     if(msgState.sections.has('schedule'))parts.push(BLOCKS.scheduleBlock.trim()+'\n');
@@ -2127,7 +2116,7 @@ function renderPreview(){
         ? `[특강] ${msgState.fields.spName}`
         : String(msgState.fields.course||'').trim();
       const enrollBlock = msgState.fields.course===TREND_OPIC_COURSE ? BLOCKS.trendOpicEnrollBlock : BLOCKS.academyEnrollBlock;
-      parts.push(applyVars(enrollBlock,{date,time,course:courseName,loc:String(msgState.fields.loc||'').trim(),studySchedule:String(msgState.fields.trendOpicStudy||'').trim()}));
+      parts.push(applyVars(enrollBlock,{date,time,course:courseName,loc:String(msgState.fields.loc||'').trim()}));
     }
     if(msgState.type==='academyResit' && msgState.fields.course===TREND_OPIC_COURSE)parts.push(BLOCKS.trendOpicResitNote.trim()+'\n');
     if(msgState.sections.has('pay')){
