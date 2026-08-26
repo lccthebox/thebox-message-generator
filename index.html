@@ -832,7 +832,7 @@
               · 1/2 초과 → 0원<br><br>
               B안 적용 기준: 1개월 초과 결제 시 첫 1개월 금액 제외 후 추가구간에 위 비율 적용<br>
               · 일반(설린/라일리 등): <strong>8회 = 1개월</strong> 기준<br>
-              · 제임스 / 크리스: <strong>16회 = 1개월</strong> 기준 (주4회 수업)
+              · 제임스 / 조이: <strong>16회 = 1개월</strong> 기준 (주4회 수업)
             </div>
 
             <div class="btn-row">
@@ -1014,13 +1014,15 @@ const ACAD_PRICES = {
   chris:     { new8:180000, new16:310000, resit8:175000, resit16:300000 },
   courtney:  { new8:190000, new16:340000, new24:596000, resit8:185000, resit16:330000, resit24:576000 },
   jessica:   { new12:240000, new24:420000, resit12:235000, resit24:410000 },
+  trendOpic: { new8:235000, new16:470000, resit8:117500, resit16:235000 },
 };
 function getAcadPriceGroup(course) {
   if(course==='짜이뤼 중국어') return 'zhaili';
   if(course==='제임스 진짜영어') return 'james';
-  if(course==='크리스 미디어영어') return 'chris';
+  if(course==='조이 미디어영어') return 'chris';
   if(course==='코트니 Go-to영어') return 'courtney';
   if(course==='제시카 탄탄영어') return 'jessica';
+  if(course==='티나 트렌드 오픽') return 'trendOpic';
   return 'groupA';
 }
 function calcAcadMsgAmount(course, isResit, baseN, inputN, discFriend, discReview, discOther, discAudit=false) {
@@ -1116,37 +1118,41 @@ const MSG_SECTIONS = [
 ];
 
 const ACADEMY_COURSES = [
-  '설린 도전영어','라일리 Right 영어','제인 제일영어','티나 트렌디영어','다이애나 바로영어',
-  '제임스 진짜영어','크리스 미디어영어','코트니 Go-to영어','주디 Judy영어','짜이뤼 중국어','제시카 탄탄영어',
+  '설린 도전영어','라일리 Right 영어','제인 제일영어','티나 트렌디영어','티나 트렌드 오픽','다이애나 바로영어',
+  '제임스 진짜영어','조이 미디어영어','코트니 Go-to영어','주디 Judy영어','짜이뤼 중국어','제시카 탄탄영어',
   '[특강]',
 ];
-const ACADEMY_COURSES_FT = ACADEMY_COURSES.filter(c => c !== '제임스 진짜영어' && c !== '크리스 미디어영어' && c !== '제시카 탄탄영어' && c !== '[특강]');
+const TREND_OPIC_COURSE = '티나 트렌드 오픽';
+const TREND_OPIC_STUDY_OPTIONS = ['월요일 오후 7시','수요일 오후 7시','화요일 오후 8시 30분','목요일 오후 8시 30분'];
+const ACADEMY_COURSES_FT = ACADEMY_COURSES.filter(c => c !== '제임스 진짜영어' && c !== '조이 미디어영어' && c !== '제시카 탄탄영어' && c !== '티나 트렌드 오픽' && c !== '[특강]');
 function getAcademyPlanOptions(course) {
   if(course === '제시카 탄탄영어') return [['12','1달 (12회)'],['24','2달 (24회)']];
+  if(course === '티나 트렌드 오픽') return [['8','1개월 (8회)']];
   const options = [['8','1달 (8회)'],['16','2달 (16회)']];
   if(course === '코트니 Go-to영어') options.push(['24','4달 (24회)']);
   return options;
 }
 const LOCATIONS = {
   '설린 도전영어':    ['7층 704호'],
-  '라일리 Right 영어':['8층 801호'],
+  '라일리 Right 영어':['8층 806호'],
   '제인 제일영어':    ['7층 701호'],
   '티나 트렌디영어':  ['8층 805호'],
+  '티나 트렌드 오픽':['8층 805호'],
   '다이애나 바로영어':['7층 704호'],
   '제임스 진짜영어':  ['7층 703호'],
-  '크리스 미디어영어':['8층 806호'],
+  '조이 미디어영어':['8층 801호'],
   '코트니 Go-to영어': ['8층 807호'],
   '주디 Judy영어':    ['8층 803호'],
   '짜이뤼 중국어':    ['7층 705호'],
   '제시카 탄탄영어':  ['8층 803호'],
   '[특강]': [
     '설린 선생님 — 7층 704호',
-    '라일리 선생님 — 8층 801호',
+    '라일리 선생님 — 8층 806호',
     '제인 선생님 — 7층 701호',
     '티나 선생님 — 8층 805호',
     '다이애나 선생님 — 7층 704호',
     '제임스 선생님 — 7층 703호',
-    '크리스 선생님 — 8층 806호',
+    '조이 선생님 — 8층 801호',
     '코트니 선생님 — 8층 807호',
     '주디 선생님 — 8층 803호',
     '짜이뤼 선생님 — 7층 705호',
@@ -1165,11 +1171,12 @@ const COURSE_TIMES = {
   '코트니 Go-to영어': ['오전 10시 30분','오후 12시','오후 6시 50분','오후 8시 30분'],
   '라일리 Right 영어':['오전 10시','오전 11시 30분','오후 1시 30분','오후 3시','오후 6시 50분','오후 8시 30분'],
   '제임스 진짜영어':  ['오전 11시 45분','오후 8시 45분'],
-  '크리스 미디어영어':['오전 9시 30분','오후 6시 30분','오후 8시 30분'],
-  '주디 Judy영어':    ['오전 10시 30분','오전 11시 30분'],
+  '조이 미디어영어':['오전 9시 30분','오후 6시 30분','오후 8시 30분'],
+  '주디 Judy영어':    ['오전 11시 30분'],
   '다이애나 바로영어':['오전 11시 30분','오후 1시','오후 2시 40분'],
   '짜이뤼 중국어':    [], // 직접 입력
   '제시카 탄탄영어':  ['오후 6시 50분'],
+  '티나 트렌드 오픽':['오후 8시 30분'],
   '[특강]':           [], // 직접 입력
 };
 const STUDY_LEVELS = ['Beginner','Pre-intermediate','Intermediate','Upper intermediate','Advanced Low','Advanced'];
@@ -1181,11 +1188,12 @@ const DEFAULT_PRICE_TEXT = {
     '티나 트렌디영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
     '다이애나 바로영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
     '제임스 진짜영어': '1개월(8회) - 19만원 / 2개월(16회) - 32만원',
-    '크리스 미디어영어': '1개월(8회) - 18만원 / 2개월(16회) - 31만원',
+    '조이 미디어영어': '1개월(8회) - 18만원 / 2개월(16회) - 31만원',
     '코트니 Go-to영어': '1개월(8회) - 19만원 / 2개월(16회) - 34만원 / 4달(24회) - 596,000원',
     '주디 Judy영어': '1개월(8회) - 17만원 / 2개월(16회) - 30만원',
     '짜이뤼 중국어': '1개월(8회) - 15만원 / 2개월(16회) - 28만원',
     '제시카 탄탄영어': '1개월(12회) - 24만원 / 2개월(24회) - 42만원',
+    '티나 트렌드 오픽': '1개월(8회) - 23.5만원',
     '[특강]': '',
   },
   academyResit: {
@@ -1195,11 +1203,12 @@ const DEFAULT_PRICE_TEXT = {
     '티나 트렌디영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
     '다이애나 바로영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
     '제임스 진짜영어': '1개월(8회) - 18.5만원 / 2개월(16회) - 31만원',
-    '크리스 미디어영어': '1개월(8회) - 17.5만원 / 2개월(16회) - 30만원',
+    '조이 미디어영어': '1개월(8회) - 17.5만원 / 2개월(16회) - 30만원',
     '코트니 Go-to영어': '1개월(8회) - 18.5만원 / 2개월(16회) - 33만원 / 4달(24회) - 576,000원',
     '주디 Judy영어': '1개월(8회) - 16.5만원 / 2개월(16회) - 29만원',
     '짜이뤼 중국어': '1개월(8회) - 14.5만원 / 2개월(16회) - 27만원',
     '제시카 탄탄영어': '1개월(12회) - 23.5만원 / 2개월(24회) - 41만원',
+    '티나 트렌드 오픽': 'IH 미달 후 다음 달 재수강 50% 할인 - 11.75만원',
     '[특강]': '',
   },
   study: {
@@ -1235,6 +1244,9 @@ const BLOCKS = {
   academyStartHeader:`[영어회화는 더박스]\n안녕하세요. 시작하시는 수업 안내 드리겠습니다.😊\n`,
   academyResitHeader:`[영어회화는 더박스]\n안녕하세요. 재수강 안내 드리겠습니다.😊\n`,
   academyEnrollBlock:`🔸수강 및 정보 🔸\n- 시작 일자 및 시간 : {date} {time}\n- 강좌명 : {course}\n- 강의실 : {loc}\n`,
+  trendOpicEnrollBlock:`🔸트렌드 오픽 수강 안내🔸\n- 시작 일자 및 시간 : {date} {time}\n- 강좌명 : 티나 트렌드 오픽\n- 본수업 : 매주 월·수 오후 8시 30분~10시 30분 (2시간)\n- 필수 스터디 : {studySchedule} (주 1회)\n- 강의실 : {loc}\n\n※ 트렌드 오픽은 본수업 주 2회와 선택한 스터디 주 1회를 함께 참여하는 과정입니다.\n`,
+  trendOpicAuditBlock:`🔸트렌드 오픽 청강 안내🔸\n- 청강 일자 및 시간 : {date} {time}\n- 수강명 : 티나 트렌드 오픽\n- 본수업 : 매주 월·수 오후 8시 30분~10시 30분 (2시간)\n- 필수 스터디 : {studySchedule} (주 1회)\n- 위치 : {loc}\n`,
+  trendOpicResitNote:`🔸IH 목표 재수강 혜택🔸\n- IH 미달 시 바로 다음 달 재수강료 50% 할인\n- 재수강 금액 : 117,500원 (정상가 235,000원)\n※ IH 미달 확인 후 다음 달 연속 재수강 시 적용됩니다.\n`,
   payStudyBlock:`🔸결제 정보🔸\n- 금액 : {amount}\n- 결제방식 : 카드 (현장결제 / 모바일결제), 계좌이체, 온누리 및 대구로페이결제 가능\n- 이체시 결제 계좌 : iM뱅크(구. 대구은행) 01085119664 더박스\n\n▪ 온라인 링크로 카드 결제시 결제링크 받으실 번호 부탁 드립니다.\n▪ 이체시에는 상기 계좌로 이체 후에 현금영수증 발급을 위한 번호 혹은 사업자등록번호도 함께 남겨주시면 됩니다.\n`,
   payAcademyBlock:`🔸결제 정보🔸\n- 금액 : {amount}\n- 결제방식 : 카드 (현장결제 / 모바일결제), 계좌이체, 온누리 및 대구로페이결제 가능\n- 이체시 결제 계좌 : iM뱅크(구. 대구은행) 01086739664 더박스\n\n▪ 온라인 링크로 카드 결제시 결제링크 받으실 번호 부탁 드립니다.\n▪ 이체시에는 상기 계좌로 이체 후에 현금영수증 발급을 위한 번호 혹은 사업자등록번호도 함께 남겨주시면 됩니다.\n`,
   discountBlock:`🔹 영수증 리뷰 5,000원 추가 할인\n1. 네이버 플레이스에 리뷰 작성 (사진 아무거나 첨부 OK)\n2. 작성일이 보이도록 캡처 후 카톡 전송\n※ 리뷰 작성법 필요하시면 말씀해주세요!\n`,
@@ -1312,6 +1324,7 @@ const msgState = {
     amountStudy:DEFAULT_PRICE_TEXT.study['원어민 회화스터디'],
     studyPlan: '16', studyCustomN: 16, // 스터디 플랜 선택
     acadPlan: '8', acadCustomN: 8,      // 아카데미 기준회차 (8=1달, 16=2달)
+    trendOpicStudy:TREND_OPIC_STUDY_OPTIONS[0],
     course:ACADEMY_COURSES[0],
     loc:(LOCATIONS[ACADEMY_COURSES[0]]||[''])[0],
     amountAcademy:DEFAULT_PRICE_TEXT.academy[ACADEMY_COURSES[0]]||'',
@@ -1612,6 +1625,15 @@ function renderFields(){
       renderFields();renderPreview();
     });
     addRow('강좌명',s);
+  }
+  if(msgState.fields.course===TREND_OPIC_COURSE && ['audit','academyStart','academyResit'].includes(msgState.type)){
+    const studySchedule = TREND_OPIC_STUDY_OPTIONS.includes(msgState.fields.trendOpicStudy)
+      ? msgState.fields.trendOpicStudy
+      : TREND_OPIC_STUDY_OPTIONS[0];
+    msgState.fields.trendOpicStudy = studySchedule;
+    const s = mkSelect(TREND_OPIC_STUDY_OPTIONS, studySchedule);
+    s.addEventListener('change',()=>{ msgState.fields.trendOpicStudy=s.value; renderPreview(); });
+    addRow('필수 스터디',s);
   }
   if(fieldVisible('loc')){
     const locList = LOCATIONS[msgState.fields.course] || [];
@@ -2069,7 +2091,10 @@ function renderPreview(){
   }
   if(msgState.type==='audit'){
     parts.push(BLOCKS.auditHeader.trim()+'\n');
-    if(msgState.sections.has('auditInfo'))parts.push(applyVars(BLOCKS.auditInfoBlock,{date,time,course:String(msgState.fields.course||'').trim(),loc:String(msgState.fields.loc||'').trim()}));
+    if(msgState.sections.has('auditInfo')){
+      const auditBlock = msgState.fields.course===TREND_OPIC_COURSE ? BLOCKS.trendOpicAuditBlock : BLOCKS.auditInfoBlock;
+      parts.push(applyVars(auditBlock,{date,time,course:String(msgState.fields.course||'').trim(),loc:String(msgState.fields.loc||'').trim(),studySchedule:String(msgState.fields.trendOpicStudy||'').trim()}));
+    }
     if(msgState.sections.has('auditFee'))parts.push((msgState.fields.auditFeeStatus==='paid'?BLOCKS.auditFeePaid:BLOCKS.auditFeeUnpaid).trim()+'\n');
     if(msgState.sections.has('schedule'))parts.push(BLOCKS.scheduleBlock.trim()+'\n');
     parts.push(BLOCKS.footer);previewMsg.textContent=parts.join('\n').replace(/\n{3,}/g,'\n\n').trim()+'\n';return;
@@ -2099,8 +2124,10 @@ function renderPreview(){
       const courseName = msgState.fields.course==='[특강]' && msgState.fields.spName
         ? `[특강] ${msgState.fields.spName}`
         : String(msgState.fields.course||'').trim();
-      parts.push(applyVars(BLOCKS.academyEnrollBlock,{date,time,course:courseName,loc:String(msgState.fields.loc||'').trim()}));
+      const enrollBlock = msgState.fields.course===TREND_OPIC_COURSE ? BLOCKS.trendOpicEnrollBlock : BLOCKS.academyEnrollBlock;
+      parts.push(applyVars(enrollBlock,{date,time,course:courseName,loc:String(msgState.fields.loc||'').trim(),studySchedule:String(msgState.fields.trendOpicStudy||'').trim()}));
     }
+    if(msgState.type==='academyResit' && msgState.fields.course===TREND_OPIC_COURSE)parts.push(BLOCKS.trendOpicResitNote.trim()+'\n');
     if(msgState.sections.has('pay')){
       const isResit2 = msgState.type==='academyResit';
       const course2 = String(msgState.fields.course||'').trim();
@@ -2259,9 +2286,10 @@ const FEE_TABLE = {
   academy:{
     groupA:{label:'설린 / 라일리 / 제인 / 티나 / 다이애나 / 주디',new:[{key:'m1',label:'1개월 (170,000 / 기준 8)',baseSessions:8,baseAmount:170000},{key:'m2',label:'2개월 (300,000 / 기준 16)',baseSessions:16,baseAmount:300000}],resit:[{key:'m1',label:'1개월 (165,000 / 기준 8)',baseSessions:8,baseAmount:165000},{key:'m2',label:'2개월 (290,000 / 기준 16)',baseSessions:16,baseAmount:290000}]},
     james:{label:'제임스 진짜영어',new:[{key:'w2',label:'주2회 (190,000 / 기준 8)',baseSessions:8,baseAmount:190000},{key:'w4',label:'주4회 (320,000 / 기준 16)',baseSessions:16,baseAmount:320000}],resit:[{key:'w2',label:'주2회 (185,000 / 기준 8)',baseSessions:8,baseAmount:185000},{key:'w4',label:'주4회 (310,000 / 기준 16)',baseSessions:16,baseAmount:310000}]},
-    chris:{label:'크리스 미디어영어',new:[{key:'w2',label:'주2회 (180,000 / 기준 8)',baseSessions:8,baseAmount:180000},{key:'w4',label:'주4회 (310,000 / 기준 16)',baseSessions:16,baseAmount:310000}],resit:[{key:'w2',label:'주2회 (175,000 / 기준 8)',baseSessions:8,baseAmount:175000},{key:'w4',label:'주4회 (300,000 / 기준 16)',baseSessions:16,baseAmount:300000}]},
+    chris:{label:'조이 미디어영어',new:[{key:'w2',label:'주2회 (180,000 / 기준 8)',baseSessions:8,baseAmount:180000},{key:'w4',label:'주4회 (310,000 / 기준 16)',baseSessions:16,baseAmount:310000}],resit:[{key:'w2',label:'주2회 (175,000 / 기준 8)',baseSessions:8,baseAmount:175000},{key:'w4',label:'주4회 (300,000 / 기준 16)',baseSessions:16,baseAmount:300000}]},
     courtney:{label:'코트니 Go-to영어',new:[{key:'m1',label:'1개월 (190,000 / 기준 8)',baseSessions:8,baseAmount:190000},{key:'m2',label:'2개월(2과목) (340,000 / 기준 16)',baseSessions:16,baseAmount:340000},{key:'m4',label:'4달 (596,000 / 기준 24)',baseSessions:24,baseAmount:596000}],resit:[{key:'m1',label:'1개월 (185,000 / 기준 8)',baseSessions:8,baseAmount:185000},{key:'m2',label:'2개월(2과목) (330,000 / 기준 16)',baseSessions:16,baseAmount:330000},{key:'m4',label:'4달 (576,000 / 기준 24)',baseSessions:24,baseAmount:576000}]},
     jessica:{label:'제시카 탄탄영어',new:[{key:'m1',label:'1개월 (240,000 / 기준 12)',baseSessions:12,baseAmount:240000},{key:'m2',label:'2개월 (420,000 / 기준 24)',baseSessions:24,baseAmount:420000}],resit:[{key:'m1',label:'1개월 (235,000 / 기준 12)',baseSessions:12,baseAmount:235000},{key:'m2',label:'2개월 (410,000 / 기준 24)',baseSessions:24,baseAmount:410000}]},
+    trendOpic:{label:'티나 트렌드 오픽',new:[{key:'m1',label:'1개월 (235,000원)',baseSessions:8,baseAmount:235000}],resit:[{key:'m1',label:'IH 미달 재수강 50% (117,500원)',baseSessions:8,baseAmount:117500}]},
     zhaili:{label:'짜이뤼 중국어',new:[{key:'m1',label:'1개월 (150,000 / 기준 8)',baseSessions:8,baseAmount:150000},{key:'m2',label:'2개월 (280,000 / 기준 16)',baseSessions:16,baseAmount:280000}],resit:[{key:'m1',label:'1개월 (145,000 / 기준 8)',baseSessions:8,baseAmount:145000},{key:'m2',label:'2개월 (270,000 / 기준 16)',baseSessions:16,baseAmount:270000}]},
   },
   study:{only:{label:'원어민 회화스터디',new:[{key:'8',label:'8회 (150,000)',baseSessions:8,baseAmount:150000},{key:'16',label:'16회 (277,000)',baseSessions:16,baseAmount:277000},{key:'32',label:'32회 (494,000)',baseSessions:32,baseAmount:494000}],resit:[{key:'8',label:'8회 (150,000)',baseSessions:8,baseAmount:150000},{key:'16',label:'16회 (277,000)',baseSessions:16,baseAmount:277000},{key:'32',label:'32회 (494,000)',baseSessions:32,baseAmount:494000}]}}
@@ -2482,7 +2510,7 @@ feeEls.discOtherOn.addEventListener('change',()=>{feeEls.discOtherAmount.readOnl
 /* =========================================================
    (C) 환불 계산기(B안) — 원본 로직 100% 유지
 ========================================================= */
-const RF_PRICES={academy:{groupA:{label:'설린 / 라일리 / 제인 / 티나 / 다이애나 / 주디',monthUnit:8,new:{p8:170000,p16:300000},resit:{p8:165000,p16:290000}},james:{label:'제임스',monthUnit:16,new:{p8:190000,p16:320000},resit:{p8:185000,p16:310000}},chris:{label:'크리스',monthUnit:16,new:{p8:180000,p16:310000},resit:{p8:175000,p16:300000}},courtney:{label:'코트니',monthUnit:8,new:{p8:190000,p16:340000,p24:596000},resit:{p8:185000,p16:330000,p24:576000}},jessica:{label:'제시카 탄탄영어',monthUnit:12,new:{p12:240000,p24:420000},resit:{p12:235000,p24:410000}}},study:{only:{label:'원어민 회화스터디',monthUnit:null,new:{p8:150000,p16:277000,p32:494000,p48:657000},resit:{p8:150000,p16:277000,p32:494000,p48:657000}}}};
+const RF_PRICES={academy:{groupA:{label:'설린 / 라일리 / 제인 / 티나 / 다이애나 / 주디',monthUnit:8,new:{p8:170000,p16:300000},resit:{p8:165000,p16:290000}},james:{label:'제임스',monthUnit:16,new:{p8:190000,p16:320000},resit:{p8:185000,p16:310000}},chris:{label:'조이 미디어영어',monthUnit:16,new:{p8:180000,p16:310000},resit:{p8:175000,p16:300000}},courtney:{label:'코트니',monthUnit:8,new:{p8:190000,p16:340000,p24:596000},resit:{p8:185000,p16:330000,p24:576000}},jessica:{label:'제시카 탄탄영어',monthUnit:12,new:{p12:240000,p24:420000},resit:{p12:235000,p24:410000}},trendOpic:{label:'티나 트렌드 오픽',monthUnit:8,new:{p8:235000,p16:470000},resit:{p8:117500,p16:235000}}},study:{only:{label:'원어민 회화스터디',monthUnit:null,new:{p8:150000,p16:277000,p32:494000,p48:657000},resit:{p8:150000,p16:277000,p32:494000,p48:657000}}}};
 const rfEls={cat:document.getElementById('rfCat'),group:document.getElementById('rfGroup'),payType:document.getElementById('rfPayType'),paidSessions:document.getElementById('rfPaidSessions'),usedSessions:document.getElementById('rfUsedSessions'),paidAmount:document.getElementById('rfPaidAmount'),override:document.getElementById('rfOverride'),paidAmountInput:document.getElementById('rfPaidAmountInput'),discFriend:document.getElementById('rfDiscFriend'),discReview:document.getElementById('rfDiscReview'),preview:document.getElementById('previewRefund')};
 function rfGroupOptions(){const cat=rfEls.cat.value;if(cat==='fasttrack')return;const groups=RF_PRICES[cat];rfEls.group.innerHTML='';Object.keys(groups).forEach(k=>{const opt=document.createElement('option');opt.value=k;opt.textContent=groups[k].label;rfEls.group.appendChild(opt);});}
 function calcPaidAmountFromSessions(){const cat=rfEls.cat.value;const groupKey=rfEls.group.value;const payType=rfEls.payType.value;const N=Number(rfEls.paidSessions.value||0);if(cat==='academy'){const price=RF_PRICES.academy[groupKey][payType];if(groupKey==='jessica'){if(N<=12)return Math.round(price.p12*(N/12));return Math.round(price.p24*(N/24));}if(N<=8)return Math.round(price.p8*(N/8));return Math.round(price.p16*(N/16));}else{const price=RF_PRICES.study[groupKey][payType];if(N<=8)return Math.round(price.p8*(N/8));if(N<=16)return Math.round(price.p16*(N/16));if(N<=32)return Math.round(price.p32*(N/32));if(N<=48)return Math.round(price.p48*(N/48));return Math.round(price.p48*(N/48));}}
@@ -2739,7 +2767,7 @@ function rfShowFt(isFt) {
       · 1/2 초과 → 0원<br><br>
       B안 적용 기준: 1개월 초과 결제 시 첫 1개월 금액 제외 후 추가구간에 위 비율 적용<br>
       · 일반(설린/라일리 등): <strong>8회 = 1개월</strong> 기준<br>
-      · 제임스 / 크리스: <strong>16회 = 1개월</strong> 기준 (주4회 수업)`;
+      · 제임스 / 조이: <strong>16회 = 1개월</strong> 기준 (주4회 수업)`;
   }
 }
 
