@@ -1707,10 +1707,14 @@ function renderFields(){
     const curCourse = courseList.includes(msgState.fields.course) ? msgState.fields.course : courseList[0];
     const s=mkSelect(courseList, curCourse);
     s.addEventListener('change',()=>{
+      const previousCourse=msgState.fields.course;
       msgState.fields.course=s.value;
       msgState.fields.loc=(LOCATIONS[s.value]||[])[0]||'';
       const validPlans = getAcademyPlanOptions(s.value).map(([value])=>value);
-      if(!validPlans.includes(msgState.fields.acadPlan)){
+      if(s.value==='제시카 탄탄영어' && previousCourse!==s.value){
+        msgState.fields.acadPlan=validPlans[0];
+        msgState.fields.acadCustomN=Number(validPlans[0]);
+      } else if(!validPlans.includes(msgState.fields.acadPlan)){
         msgState.fields.acadPlan=validPlans[0];
         msgState.fields.acadCustomN=Number(validPlans[0]);
       }
