@@ -849,6 +849,7 @@
               · 소진/총회차 ≤ 1/3 → 결제금액 × 2/3 환불<br>
               · 1/3 초과 ~ 1/2 이하 → 결제금액 × 1/2 환불<br>
               · 1/2 초과 → 0원<br><br>
+              스터디 16회권에서 8회 정확히 소진 시: <strong>8회권 150,000원 차감 후 환불</strong><br><br>
               B안 적용 기준: 1개월 초과 결제 시 첫 1개월 금액 제외 후 추가구간에 위 비율 적용<br>
               · 일반(설린/라일리 등): <strong>8회 = 1개월</strong> 기준<br>
               · 제시카 주2회: <strong>8회 = 1개월</strong> / 주3회: <strong>12회 = 1개월</strong> 기준<br>
@@ -2720,6 +2721,10 @@ function calcRefund(){
           }
         }
       }
+    } else if(cat==='study' && N===16 && used===8) {
+      const eightSessionPrice = RF_PRICES.study[gk][payType].p8;
+      refund = Math.max(0, paid - eightSessionPrice);
+      rateLabel = '16회 중 8회 소진 → 전체취소 후 8회권 재결제 차감';
     } else {
       const r = used/N;
       if(used===0)       { refund=paid;                       rateLabel='사용 0회 (전액)'; }
@@ -2906,8 +2911,10 @@ function rfShowFt(isFt) {
       · 소진/총회차 ≤ 1/3 → 결제금액 × 2/3 환불<br>
       · 1/3 초과 ~ 1/2 이하 → 결제금액 × 1/2 환불<br>
       · 1/2 초과 → 0원<br><br>
+      스터디 16회권에서 8회 정확히 소진 시: <strong>8회권 150,000원 차감 후 환불</strong><br><br>
       B안 적용 기준: 1개월 초과 결제 시 첫 1개월 금액 제외 후 추가구간에 위 비율 적용<br>
       · 일반(설린/라일리 등): <strong>8회 = 1개월</strong> 기준<br>
+      · 제시카 주2회: <strong>8회 = 1개월</strong> / 주3회: <strong>12회 = 1개월</strong> 기준<br>
       · 제임스 / 조이: <strong>16회 = 1개월</strong> 기준 (주4회 수업)`;
   }
 }
