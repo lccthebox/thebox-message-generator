@@ -1075,7 +1075,7 @@ function calcAcadMsgAmount(course, isResit, baseN, inputN, discFriend, discRevie
 // 스터디 플랜 옵션
 const STUDY_PLANS = [
   { key:'16',  label:'16회', price:277000, note:'총 16회, 3개월 내 사용' },
-  { key:'32',  label:'32회', price:494000, note:'총 32회, 6개월 내 사용' },
+
   { key:'48',  label:'48회', price:657000, note:'총 48회, 9개월 내 사용' },
   { key:'custom', label:'기타 횟수', price:277000, note:'277,000원 기준 N/16 계산' },
 ];
@@ -1103,7 +1103,7 @@ function calcStudyConversion(currentSessions, targetSessions, paidAmount) {
 function calcStudyMsgAmount(plan, customN) {
   if(plan==='custom') {
     const n = Number(customN)||1;
-    return { amt: Math.round(277000 * n / 16), note: `총 ${n}회` };
+    return { amt: Math.round(277000 * n / 16), note: `맞춤 계산(표준 상품 아님) · 총 ${n}회` };
   }
   const p = STUDY_PLANS.find(x=>x.key===plan) || STUDY_PLANS[0];
   return { amt: p.price, note: p.note };
@@ -1236,11 +1236,11 @@ const DEFAULT_PRICE_TEXT = {
   },
   study: {
     '원어민 회화스터디':
-      '16회 277,000원 (최대 사용기간 3개월)\n32회 494,000원 (최대 사용기간 6개월)\n48회 657,000원 (최대 사용기간 9개월)',
+      '16회 277,000원 (최대 사용기간 3개월)\n48회 657,000원 (최대 사용기간 9개월)',
   },
   studyExtend: {
     '원어민 회화스터디':
-      '16회 277,000원 (최대 사용기간 3개월)\n32회 494,000원 (최대 사용기간 6개월)\n48회 657,000원 (최대 사용기간 9개월)',
+      '16회 277,000원 (최대 사용기간 3개월)\n48회 657,000원 (최대 사용기간 9개월)',
   },
 };
 const DEFAULT_SECTIONS_BY_TYPE = {
@@ -1682,7 +1682,7 @@ function renderFields(){
     const sp = document.createElement('select');
     STUDY_PLANS.forEach(p=>{
       const opt=document.createElement('option'); opt.value=p.key;
-      opt.textContent = p.key==='custom' ? '기타 횟수' : `${p.label} — ${p.note}`;
+      opt.textContent = p.key==='custom' ? '기타 횟수 · 맞춤 계산(표준 상품 아님)' : `${p.label} — ${p.note}`;
       if(msgState.fields.studyPlan===p.key) opt.selected=true;
       sp.appendChild(opt);
     });
@@ -2105,7 +2105,7 @@ function renderFields(){
     const esp = document.createElement('select');
     STUDY_PLANS.forEach(p=>{
       const opt=document.createElement('option'); opt.value=p.key;
-      opt.textContent = p.key==='custom' ? '기타 횟수' : `${moneyFmt(p.price)}원 (${p.note})`;
+      opt.textContent = p.key==='custom' ? '기타 횟수 · 맞춤 계산(표준 상품 아님)' : `${moneyFmt(p.price)}원 (${p.note})`;
       if((msgState.fields.extendPlan||'16')===p.key) opt.selected=true;
       esp.appendChild(opt);
     });
@@ -2400,7 +2400,7 @@ const FEE_TABLE = {
     trendOpic:{label:'티나 트렌드 오픽',new:[{key:'m1',label:'1개월 (235,000원)',baseSessions:8,baseAmount:235000}],resit:[{key:'m1',label:'IH 미달 재수강 50% (117,500원)',baseSessions:8,baseAmount:117500}]},
     zhaili:{label:'짜이뤼 중국어',new:[{key:'m1',label:'1개월 (150,000 / 기준 8)',baseSessions:8,baseAmount:150000},{key:'m2',label:'2개월 (280,000 / 기준 16)',baseSessions:16,baseAmount:280000}],resit:[{key:'m1',label:'1개월 (145,000 / 기준 8)',baseSessions:8,baseAmount:145000},{key:'m2',label:'2개월 (270,000 / 기준 16)',baseSessions:16,baseAmount:270000}]},
   },
-  study:{only:{label:'원어민 회화스터디',new:[{key:'8',label:'8회 (150,000)',baseSessions:8,baseAmount:150000},{key:'16',label:'16회 (277,000)',baseSessions:16,baseAmount:277000},{key:'32',label:'32회 (494,000)',baseSessions:32,baseAmount:494000}],resit:[{key:'8',label:'8회 (150,000)',baseSessions:8,baseAmount:150000},{key:'16',label:'16회 (277,000)',baseSessions:16,baseAmount:277000},{key:'32',label:'32회 (494,000)',baseSessions:32,baseAmount:494000}]}}
+  study:{only:{label:'원어민 회화스터디',new:[{key:'8',label:'8회 (150,000)',baseSessions:8,baseAmount:150000},{key:'16',label:'16회 (277,000)',baseSessions:16,baseAmount:277000},{key:'48',label:'48회 (657,000)',baseSessions:48,baseAmount:657000}],resit:[{key:'8',label:'8회 (150,000)',baseSessions:8,baseAmount:150000},{key:'16',label:'16회 (277,000)',baseSessions:16,baseAmount:277000},{key:'48',label:'48회 (657,000)',baseSessions:48,baseAmount:657000}]}}
 };
 
 const feeEls={cat:document.getElementById('feeCat'),group:document.getElementById('feeGroup'),payType:document.getElementById('feePayType'),product:document.getElementById('feeProduct'),baseSessions:document.getElementById('feeBaseSessions'),inputSessions:document.getElementById('feeInputSessions'),baseAmount:document.getElementById('feeBaseAmount'),discFriend:document.getElementById('feeDiscFriend'),discReview:document.getElementById('feeDiscReview'),discOtherOn:document.getElementById('feeDiscOtherOn'),discOtherAmount:document.getElementById('feeDiscOtherAmount'),preview:document.getElementById('previewFee')};
